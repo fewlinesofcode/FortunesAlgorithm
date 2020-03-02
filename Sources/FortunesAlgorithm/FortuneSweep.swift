@@ -1,7 +1,7 @@
 import Foundation
 import Darwin
 
-class FortuneSweep {
+public class FortuneSweep {
     /// Service Data Structures
     private var eventQueue: PriorityQueue<Event>!
     private var beachline: Beachline!
