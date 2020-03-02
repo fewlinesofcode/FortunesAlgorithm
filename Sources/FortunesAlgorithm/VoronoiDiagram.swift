@@ -4,18 +4,18 @@ public class VoronoiDiagram {
     public private(set) var cells = [Site: Cell]()
     public private(set) var vertices = [Vertex]()
     
-    public func createCell(_ arc: Arc) {
+    func createCell(_ arc: Arc) {
         let p = arc.point!
         let cell = Cell(site: p)
         cells[p] = cell
         arc.cell = cell
     }
     
-    public func removeCell(_ cell: Cell) {
+    func removeCell(_ cell: Cell) {
         cells.removeValue(forKey: cell.site)
     }
     
-    public func createHalfEdge(_ cell: Cell) -> HalfEdge {
+    func createHalfEdge(_ cell: Cell) -> HalfEdge {
         let he = HalfEdge()
         if cell.outerComponent == nil {
             cell.outerComponent = he
