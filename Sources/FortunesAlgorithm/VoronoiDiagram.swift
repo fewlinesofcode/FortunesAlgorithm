@@ -1,21 +1,21 @@
 import Foundation
 
 public class VoronoiDiagram {
-    private(set) var cells = [Site: Cell]()
-    private(set) var vertices = [Vertex]()
+    public private(set) var cells = [Site: Cell]()
+    public private(set) var vertices = [Vertex]()
     
-    func createCell(_ arc: Arc) {
+    public func createCell(_ arc: Arc) {
         let p = arc.point!
         let cell = Cell(site: p)
         cells[p] = cell
         arc.cell = cell
     }
     
-    func removeCell(_ cell: Cell) {
+    public func removeCell(_ cell: Cell) {
         cells.removeValue(forKey: cell.site)
     }
     
-    func createHalfEdge(_ cell: Cell) -> HalfEdge {
+    public func createHalfEdge(_ cell: Cell) -> HalfEdge {
         let he = HalfEdge()
         if cell.outerComponent == nil {
             cell.outerComponent = he
@@ -24,7 +24,7 @@ public class VoronoiDiagram {
         return he
     }
     
-    func addVertex(_ v: Vertex) {
+    public func addVertex(_ v: Vertex) {
         vertices.append(v)
     }
 }
@@ -39,12 +39,12 @@ public typealias Vertex = Site
 /// • `outerComponent` linked list (looped when diagram is built)
 /// • `site` - pointer to the site
 public class Cell {
-    var satellite: Any?
-    var outerComponent: HalfEdge? = nil
+    public var satellite: Any?
+    public var outerComponent: HalfEdge? = nil
     
-    private(set) var site: Site
+    public private(set) var site: Site
     
-    init(site: Site) {
+    public init(site: Site) {
         self.site = site
     }
 }
@@ -56,19 +56,19 @@ public class Cell {
 /// • Next(e): next half‐edge on the boundary of IncidentFace(e)
 /// • Previous(e): previous half‐edge
 public class HalfEdge {
-    var satellite: Any?
+    public var satellite: Any?
     
-    var origin: Vertex?
-    var destination: Vertex?
+    public var origin: Vertex?
+    public var destination: Vertex?
     
-    weak var twin: HalfEdge?
-    weak var incidentFace: Cell?
-    weak var prev: HalfEdge?
-    var next: HalfEdge?
+    public weak var twin: HalfEdge?
+    public weak var incidentFace: Cell?
+    public weak var prev: HalfEdge?
+    public var next: HalfEdge?
 }
 
 public extension HalfEdge {
-    func toSegment() -> LineSegment? {
+    public func toSegment() -> LineSegment? {
         guard
             let o = origin,
             let d = destination
