@@ -4,6 +4,10 @@ public class VoronoiDiagram {
     public private(set) var cells = [Site: Cell]()
     public private(set) var vertices = [Vertex]()
     
+    public init() {
+        
+    }
+    
     func createCell(_ arc: Arc) {
         let p = arc.point!
         let cell = Cell(site: p)
