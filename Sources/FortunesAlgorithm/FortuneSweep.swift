@@ -19,7 +19,7 @@ public class FortuneSweep {
     private var curStep: Int = -1
     
     
-    init() { }
+    public init() { }
     
     public func compute(
         sites: Set<Site>,
