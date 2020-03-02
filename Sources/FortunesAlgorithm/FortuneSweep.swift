@@ -39,7 +39,7 @@ public class FortuneSweep {
         beachline = Beachline()
         
         if sites.count < 2 {
-            print("NOTHING TO COMPUTE!")
+//            print("NOTHING TO COMPUTE!")
             return
         }
         
@@ -77,10 +77,10 @@ public class FortuneSweep {
             }
         }
         // Debug
-        print("""
-            Step: \(curStep)
-
-            """)
+//        print("""
+//            Step: \(curStep)
+//
+//            """)
     }
     
     
@@ -102,7 +102,7 @@ public class FortuneSweep {
         status.circles.removeAll() // Clear circle event drawing
         status.sweeplineY = sweepLineY
         status.visitedSites.append(event.point)
-        print("SITE EVENT: \(event.point)")
+//        print("SITE EVENT: \(event.point)")
         
         /// #Step 2:
         /// Each **Site Event** makes new arc(s) to appear in the **Beachline**
@@ -149,7 +149,7 @@ public class FortuneSweep {
             /// There is no sense to check for circle event when we encounter degenerate case because all the sites are colinear
 
             // Debug
-            print("DEGENERATE CASE")
+//            print("DEGENERATE CASE")
             beachline.printDOTFormat()
             return
         }
@@ -174,7 +174,7 @@ public class FortuneSweep {
             x: event.point.x,
             y: parabola.resolve(x: event.point.x)
         )
-        print("Breakpoint found: \(breakPoint)")
+//        print("Breakpoint found: \(breakPoint)")
         status.currentBreakpoint = breakPoint
         
         /// #Step 3:
@@ -325,7 +325,7 @@ public class FortuneSweep {
         // Debug
         status.currentBreakpoint = nil
         status.sweeplineY = sweepLineY
-        print("CIRCLE EVENT: \(event.point)")
+//        print("CIRCLE EVENT: \(event.point)")
         
         /// #Step 1:
         /// Delete disppearing arc from the Beachline. Tree will rebalance itself.
@@ -333,7 +333,7 @@ public class FortuneSweep {
         removeCircleEvent(arc)
         
         // Debug
-        print("REMOVE ARC: \(arc)")
+//        print("REMOVE ARC: \(arc)")
         
         /// #Step 2:
         /// Delete all circle events involving disappearing arc from the **Priority Queue**.
@@ -401,7 +401,7 @@ public class FortuneSweep {
         arc.event = nil
         
         // Debug
-        print("REMOVE CIRCLE EVENT: \(event)")
+//        print("REMOVE CIRCLE EVENT: \(event)")
         if let circle = event.circle {
             status.upcomingCircleEvents = status.upcomingCircleEvents.filter { $0 != circle.bottomPoint }
         }
@@ -413,14 +413,14 @@ public class FortuneSweep {
     /// 2. Complete incomplete cells
     /// 3. Clip cells to clipping rectangle
     private func terminate() {
-        print("""
-            -------------------------
-            TERMINATION:
-            -------------------------
-            """)
+//        print("""
+//            -------------------------
+//            TERMINATION:
+//            -------------------------
+//            """)
         
         if diagram.cells.count < 1 {
-            print("EMPTY DIAGRAM!")
+//            print("EMPTY DIAGRAM!")
             return
         }
         
