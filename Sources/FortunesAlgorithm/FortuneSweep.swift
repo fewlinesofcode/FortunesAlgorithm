@@ -1,5 +1,4 @@
 import Foundation
-import Darwin
 
 public class FortuneSweep {
     /// Service Data Structures
@@ -12,34 +11,25 @@ public class FortuneSweep {
     private var clipper: Rectangle!
     
     /// Result Data Structure
-    private(set) var diagram = VoronoiDiagram()
-    
-    /// Debug Data Structure
-    private(set) var status = VoronoiStatus()
-    private var curStep: Int = -1
-    
+    private(set) var diagram = Diagram()
     
     public init() { }
     
     public func compute(
         sites: Set<Site>,
-        diagram: inout VoronoiDiagram,
-        status: inout VoronoiStatus,
-        clippingRect: Rectangle,
-        numSteps: Int = -1
+        diagram: inout Diagram,
+        clippingRect: Rectangle
     ) {
         self.diagram = diagram
-        self.status = status
         self.clipper = clippingRect
-        
-        status.box = clippingRect
+
         
         sweepLineY = 0
         firstSiteY = nil
         beachline = Beachline()
         
         if sites.count < 2 {
-//            print("NOTHING TO COMPUTE!")
+            #warning("Return container")
             return
         }
         
@@ -48,14 +38,10 @@ public class FortuneSweep {
             startingValues: sites.map { Event(point: $0) }
         )
         
-        // Debug
-        curStep = 0
-        status.notVisitedSites = sites.map { $0 }
-        
         var finished = false
         while !finished {
             step()
-            finished = eventQueue.isEmpty || (numSteps > 0 && curStep == numSteps)
+            finished = eventQueue.isEmpty
         }
         if eventQueue.isEmpty {
             terminate()
@@ -67,7 +53,6 @@ public class FortuneSweep {
     /// 1. Pop an event from the event queue
     /// 2. Check the event type and process the event appropriately
     private func step() {
-        curStep += 1
         if let event = eventQueue.pop() {
             switch event.kind {
                 case .site:
@@ -76,18 +61,12 @@ public class FortuneSweep {
                     processCircleEvent(event)
             }
         }
-        // Debug
-//        print("""
-//            Step: \(curStep)
-//
-//            """)
     }
     
     
     /// Processes **Site event** and performs all the necessary actions
     /// - Parameter event: **Site Event** to process
     private func processSiteEvent(_ event: Event) {
-        
         /// Ignore ceells that are not contained by Clipping Rectangle
         guard clipper.contains(event.point) else {
             return
@@ -97,12 +76,6 @@ public class FortuneSweep {
         /// Update **Sweepline** position
         sweepLineY = event.point.y
         beachline.updateSweeplineY(sweepLineY)
-        
-        // Debug
-        status.circles.removeAll() // Clear circle event drawing
-        status.sweeplineY = sweepLineY
-        status.visitedSites.append(event.point)
-//        print("SITE EVENT: \(event.point)")
         
         /// #Step 2:
         /// Each **Site Event** makes new arc(s) to appear in the **Beachline**
@@ -147,10 +120,6 @@ public class FortuneSweep {
             makeTwins(prev.rightHalfEdge, arc.leftHalfEdge)
 
             /// There is no sense to check for circle event when we encounter degenerate case because all the sites are colinear
-
-            // Debug
-//            print("DEGENERATE CASE")
-            beachline.printDOTFormat()
             return
         }
         
@@ -167,15 +136,6 @@ public class FortuneSweep {
         /// Create new **Cell** record in **Voronoi Diagram**
         container.expandToContainPoint(event.point)
         diagram.createCell(newArc)
-        
-        // Debug
-        let parabola = Parabola(focus: newArc.prev!.point!, directrixY: sweepLineY)
-        let breakPoint = Site(
-            x: event.point.x,
-            y: parabola.resolve(x: event.point.x)
-        )
-//        print("Breakpoint found: \(breakPoint)")
-        status.currentBreakpoint = breakPoint
         
         /// #Step 3:
         /// If the arc we broke has circle event, than this event is false-alarm and has to be removed
@@ -247,10 +207,6 @@ public class FortuneSweep {
             newArc.rightHalfEdge = newArc.leftHalfEdge
             next.leftHalfEdge = prev.rightHalfEdge
         }
-        
-        // Debug
-        beachline.printDOTFormat()
-        status.arcs = beachline.getArcs()
     }
     
     
@@ -322,18 +278,10 @@ public class FortuneSweep {
         sweepLineY = event.point.y
         beachline.updateSweeplineY(sweepLineY)
         
-        // Debug
-        status.currentBreakpoint = nil
-        status.sweeplineY = sweepLineY
-//        print("CIRCLE EVENT: \(event.point)")
-        
         /// #Step 1:
         /// Delete disppearing arc from the Beachline. Tree will rebalance itself.
         beachline.delete(arc: arc)
         removeCircleEvent(arc)
-        
-        // Debug
-//        print("REMOVE ARC: \(arc)")
         
         /// #Step 2:
         /// Delete all circle events involving disappearing arc from the **Priority Queue**.
@@ -353,10 +301,6 @@ public class FortuneSweep {
         /// Do the same for the triple where the former right neighbor is the middle arc.
         createCircleEvent(left)
         createCircleEvent(right)
-        
-        // Debug
-        beachline.printDOTFormat()
-        status.arcs = beachline.getArcs()
     }
     
     /// Creates circle event for the coresponding **Arc** in the **Beachline**
@@ -380,10 +324,6 @@ public class FortuneSweep {
         arc.event = event
         
         eventQueue.push(event)
-        
-        // Debug
-        status.circles.append(circle)
-        status.upcomingCircleEvents.append(circle.bottomPoint)
     }
     
     /// Removes circle event from the **Priority Queue** and removes event from the **Arc**
@@ -399,12 +339,6 @@ public class FortuneSweep {
         
         eventQueue.removeAll(event)
         arc.event = nil
-        
-        // Debug
-//        print("REMOVE CIRCLE EVENT: \(event)")
-        if let circle = event.circle {
-            status.upcomingCircleEvents = status.upcomingCircleEvents.filter { $0 != circle.bottomPoint }
-        }
     }
     
   
@@ -413,14 +347,8 @@ public class FortuneSweep {
     /// 2. Complete incomplete cells
     /// 3. Clip cells to clipping rectangle
     private func terminate() {
-//        print("""
-//            -------------------------
-//            TERMINATION:
-//            -------------------------
-//            """)
-        
         if diagram.cells.count < 1 {
-//            print("EMPTY DIAGRAM!")
+            #warning("Return container")
             return
         }
         
@@ -455,10 +383,6 @@ public class FortuneSweep {
             if cell.outerComponent?.prev == nil || cell.outerComponent?.next == nil {
                 completeIncompleteCell(cell)
             }
-            
-//            if !clipper.contains(cell.site) {
-//                diagram.removeCell(cell)
-//            }
             
             // Step 3:
             // Clip cells
@@ -702,15 +626,6 @@ extension FortuneSweep {
                 step()
             }
         }
-        
-        if eventQueue.isEmpty {
-            terminate()
-        }
-    }
-    
-    @objc
-    public func debugStep() {
-        step()
         
         if eventQueue.isEmpty {
             terminate()

@@ -95,14 +95,6 @@ extension Rectangle {
     }
 }
 
-extension Rectangle: CustomStringConvertible {
-    public var description: String {
-        return "(x: \(x), y: \(y), width: \(width), height: \(height))"
-    }
-}
-
-
-
 
 extension Rectangle {
     

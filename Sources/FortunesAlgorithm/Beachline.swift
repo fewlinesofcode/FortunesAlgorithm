@@ -22,16 +22,6 @@ final class Arc {
     init() { }
 }
 
-extension Arc: CustomStringConvertible {
-    public var description: String {
-        let prev = self.prev?.point?.description ?? "nil"
-        let curr = self.point?.description ?? "nil"
-        let next = self.next?.point?.description ?? "nil"
-        return "<\(prev)--\(curr)--\(next)>"
-    }
-}
-
-
 final class Beachline {
     var sweeplineY: Double = 0
     
@@ -423,50 +413,5 @@ extension Beachline {
             return nil
         }
         return maximum(r)
-    }
-}
-
-extension Beachline {
-    func printDOTFormat() {
-//        print("digraph G {")
-//        if let root = root {
-//            toDOT(node: root)
-//        }
-//        print("}")
-    }
-    
-    private func toDOT(node: Arc) {
-        guard node !== sentinel else { return }
-        let curr = toString(node)
-        if let l = node.left {
-            let left = toString(l)
-            print("\"\(curr)\"->\"\(left)\"[taillabel = \"L\"]")
-            toDOT(node: l)
-        }
-        if let r = node.right {
-            let right = toString(r)
-            print("\"\(curr)\"->\"\(right)\"[taillabel = \"R\"]")
-            toDOT(node: r)
-        }
-    }
-    
-    private func toString(_ arc: Arc?) -> String {
-        if arc?.point == nil {
-            return "nullleaf"
-        } else {
-            return arc?.description ?? "WARNING"
-        }
-    }
-    
-    public func getArcs() -> [(parabola: Parabola, lBound: Double, rBound: Double)] {
-        var arcs = [(parabola: Parabola, lBound: Double, rBound: Double)]()
-        var arc = minimum
-        while arc != nil {
-            let parabola = Parabola(focus: arc!.point!, directrixY: sweeplineY)
-            let (lb, rb) = arc!.bounds(sweeplineY)
-            arcs.append((parabola, lb, rb))
-            arc = arc?.next
-        }
-        return arcs
     }
 }

@@ -1,12 +1,17 @@
+//
+//  File.swift
+//  
+//
+//  Created by Oleksandr Glagoliev on 3/3/20.
+//
+
 import Foundation
 
-public class VoronoiDiagram {
+public class Diagram {
     public private(set) var cells = [Site: Cell]()
     public private(set) var vertices = [Vertex]()
     
-    public init() {
-        
-    }
+    public init() { }
     
     func createCell(_ arc: Arc) {
         let p = arc.point!
@@ -72,7 +77,7 @@ public class HalfEdge {
 }
 
 public extension HalfEdge {
-    public func toSegment() -> LineSegment? {
+    func toSegment() -> LineSegment? {
         guard
             let o = origin,
             let d = destination
@@ -82,3 +87,4 @@ public extension HalfEdge {
         return LineSegment(a: o, b: d)
     }
 }
+

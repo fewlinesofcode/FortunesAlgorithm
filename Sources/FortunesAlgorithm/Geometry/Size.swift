@@ -5,7 +5,6 @@
 
 import Foundation
 
-
 /// Represents the size of Rectangular object
 public struct Size {
     var width: Double
@@ -14,11 +13,5 @@ public struct Size {
     public init(width: Double, height: Double) {
         self.width = width
         self.height = height
-    }
-}
-
-extension Size: CustomStringConvertible {
-    public var description: String {
-        return "(width: \(width), height: \(height))"
     }
 }

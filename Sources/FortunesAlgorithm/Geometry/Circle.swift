@@ -63,9 +63,3 @@ extension Circle {
         )
     }
 }
-
-extension Circle: CustomStringConvertible {
-    public var description: String {
-        return "Circle: \(radius)^2=(x-\(center.x))^2+(y-\(center.y))^2"
-    }
-}
