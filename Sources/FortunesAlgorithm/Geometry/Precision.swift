@@ -1,3 +1,3 @@
 import Foundation
 
-let eps: Double = 1e-9
+let eps: Double = 1e-7

@@ -23,8 +23,8 @@ public struct Site {
 
 extension Site: Hashable {
     public static func == (lhs: Site, rhs: Site) -> Bool {
-        abs(lhs.x - rhs.x) < eps
-        && abs(lhs.y - rhs.y) < eps
+        lhs.x == rhs.x
+        && lhs.y == rhs.y
     }
     
     public func hash(into hasher: inout Hasher) {
@@ -33,9 +33,4 @@ extension Site: Hashable {
     }
 }
 
-extension Site: CustomStringConvertible {
-    public var description: String {
-        return "(x: \(x), y: \(y))"
-    }
-}
 
