@@ -7,7 +7,7 @@ public class FortuneSweep {
     private var sweepLineY = Double(0)
     private var firstSiteY: Double?
     
-    private(set) var container: Rectangle!
+    private var container: Rectangle!
     private var clipper: Rectangle!
     
     /// Result Data Structure
@@ -22,20 +22,19 @@ public class FortuneSweep {
     ) {
         self.diagram = diagram
         self.clipper = clippingRect
-
+        let filtered = sites
+            .filter { clipper.contains($0) }
+            .map { Event(point: $0) }
+        /// Diagram is a whole plane. Do nothing
+        if filtered.isEmpty { return }
         
         sweepLineY = 0
         firstSiteY = nil
         beachline = Beachline()
         
-        if sites.count < 2 {
-            #warning("Return container")
-            return
-        }
-        
         eventQueue = PriorityQueue(
             ascending: true,
-            startingValues: sites.map { Event(point: $0) }
+            startingValues: filtered
         )
         
         var finished = false
@@ -47,7 +46,6 @@ public class FortuneSweep {
             terminate()
         }
     }
-    
     
     /// Performs one step of the algorithm
     /// 1. Pop an event from the event queue
@@ -67,11 +65,6 @@ public class FortuneSweep {
     /// Processes **Site event** and performs all the necessary actions
     /// - Parameter event: **Site Event** to process
     private func processSiteEvent(_ event: Event) {
-        /// Ignore ceells that are not contained by Clipping Rectangle
-        guard clipper.contains(event.point) else {
-            return
-        }
-        
         /// #Step 1:
         /// Update **Sweepline** position
         sweepLineY = event.point.y
@@ -169,7 +162,6 @@ public class FortuneSweep {
                 p2: newArc.point!,
                 p3: next.point!
                 )!.center
-//            diagram.addVertex(vertex)
             
             prev.rightHalfEdge?.origin = vertex
             next.leftHalfEdge?.destination = vertex
@@ -217,7 +209,6 @@ public class FortuneSweep {
     ///   - vertex: Vertex coordinate (e.g. Circle event center)
     ///   - removedArc: The arc that will be removed from the **Beachline** after the Circle event
     private func createVertex(_ vertex: Vertex, removedArc: Arc) {
-//        diagram.addVertex(vertex)
         container.expandToContainPoint(vertex)
         
         let prevArc = removedArc.prev!
@@ -347,10 +338,9 @@ public class FortuneSweep {
     /// 2. Complete incomplete cells
     /// 3. Clip cells to clipping rectangle
     private func terminate() {
-        if diagram.cells.count < 1 {
-            #warning("Return container")
-            return
-        }
+//        if diagram.cells.count == 1 {
+//            return
+//        }
         
         // Step 1:
         // Bound incomplete arcs
@@ -386,9 +376,7 @@ public class FortuneSweep {
             
             // Step 3:
             // Clip cells
-            if cell.outerComponent != nil {
-                clipCell(cell, clippingRect: clipper)
-            }
+            clipCell(cell, clippingRect: clipper)
         }
     }
     
@@ -460,6 +448,29 @@ public class FortuneSweep {
         var start: HalfEdge?
         var end: HalfEdge?
         
+        /// Handle special case when our diagram coinsists of one site and return
+        /// Or skip to regular case
+        var firstHE: HalfEdge?
+        if cell.outerComponent == nil {
+            let corners = [clippingRect.tl, clippingRect.bl, clippingRect.br, clippingRect.tr]
+            for i in 1...corners.count {
+                let he = diagram.createHalfEdge(cell)
+                he.origin = corners[i - 1]
+                he.destination = corners[i % corners.count]
+                
+                if i == 1 {
+                    firstHE = he
+                    cell.outerComponent = he
+                }
+                
+                connect(prev: cell.outerComponent, next: he)
+                cell.outerComponent = he
+                
+            }
+            connect(prev: cell.outerComponent, next: firstHE)
+            assert(cell.outerComponent?.destination == firstHE?.origin)
+            return
+        }
         
         var he = cell.outerComponent
         while true {
@@ -478,11 +489,9 @@ public class FortuneSweep {
             } else if isDestinationClipped {
                 start = he
                 start?.destination = segment!.b
-                diagram.addVertex(segment!.b)
             } else if isOriginClipped {
                 end = he
                 end?.origin = segment!.a
-                diagram.addVertex(segment!.a)
             }
             
         
@@ -531,7 +540,6 @@ public class FortuneSweep {
         var he = head
         for point in points {
             he.destination = point
-//            diagram.addVertex(point)
             
             let newHE = diagram.createHalfEdge(cell)
             newHE.origin = point
@@ -540,7 +548,6 @@ public class FortuneSweep {
             he = newHE
         }
         he.destination = end
-//        diagram.addVertex(end)
         return (head, he)
     }
     

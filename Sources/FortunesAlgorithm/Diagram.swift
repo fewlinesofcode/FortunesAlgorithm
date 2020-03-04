@@ -33,9 +33,7 @@ public class Diagram {
         return he
     }
     
-    public func addVertex(_ v: Vertex) {
-        vertices.append(v)
-    }
+    
 }
 
 
