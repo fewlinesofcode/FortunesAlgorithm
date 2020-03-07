@@ -36,4 +36,10 @@ public extension LineSegment {
         
         return abs(point.y - (point.x * k + c)) < eps
     }
+    
+    func length() -> Double {
+        let xDist = a.x - b.x
+        let yDist = a.y - b.y
+        return (xDist * xDist + yDist * yDist).squareRoot()
+    }
 }
