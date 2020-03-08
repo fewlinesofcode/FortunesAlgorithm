@@ -62,14 +62,21 @@ class VoronoiView: UIView {
             size: Size(width: Double(bounds.width) - 100, height: Double(bounds.height) - 100)
         )
 // ----------------------------------------------------
-        curTest = (curTest) % testCases.count
-        let sites = testCases[curTest]
-        curTest += 1
+//        curTest = (curTest) % testCases.count
+//        let sites = testCases[curTest]
+//        curTest += 1
+//        diagram = Diagram()
+//
+//        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
+//        setNeedsDisplay()
+// ----------------------------------------------------
+        let sites = randomSites(500, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
         diagram = Diagram()
 
         fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
         setNeedsDisplay()
 // ----------------------------------------------------
+
         
         
 //        var site = gesture.location(in: self).point
@@ -127,7 +134,7 @@ class VoronoiView: UIView {
                 context.drawLine(
                     from: o.cgPoint,
                     to: d.cgPoint,
-                    color: UIColor.black.withAlphaComponent(1), lineWidth: 2.0
+                    color: UIColor.black.withAlphaComponent(0.1), lineWidth: 2.0
                 )
                 context.drawVertex(cell.site)
                 
@@ -135,9 +142,9 @@ class VoronoiView: UIView {
                 finish = he === cell.outerComponent
             }
 //            context.drawPolygonFromCCWPoints(points, color: (cell.site.satellite as! UIColor).withAlphaComponent(0.2))
-            context.drawPolygonFromCCWPoints(points, color: UIColor.random().withAlphaComponent(0.2))
+//            context.drawPolygonFromCCWPoints(points, color: UIColor.random().withAlphaComponent(0.2))
             
-            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 10)
+            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 40)
             context.addPath(path.cgPath)
             context.drawPath(using: .stroke)
         }
