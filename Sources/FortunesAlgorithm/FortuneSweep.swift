@@ -444,10 +444,6 @@ public class FortuneSweep {
     ///   - cell: cell to clip
     ///   - clippingRect: clipping rect
     private func clipCell(_ cell: Cell, clippingRect: Rectangle) {
-        var pairsToConnect = [(start: HalfEdge?, end: HalfEdge?)]()
-        var start: HalfEdge?
-        var end: HalfEdge?
-        
         /// Handle special case when our diagram coinsists of one site and return
         /// Or skip to regular case
         var firstHE: HalfEdge?
@@ -472,47 +468,56 @@ public class FortuneSweep {
             return
         }
         
+        
+        
         var he = cell.outerComponent
-        while true {
+        var hes = [(HalfEdge, Bool, Bool)]()
+        var firstOut = -1
+        var finish = false
+        while !finish {
             guard let segmentToClip = he?.toSegment() else {
                 fatalError("[FATAL ERROR]: Cannot create segment from the `HalfEdge`!")
             }
             
             let (isOriginClipped, isDestinationClipped, segment) = lb_clip(segmentToClip, clipper: clippingRect.toClipper())
 
-            if isOriginClipped && isDestinationClipped {
-                he?.origin = segment!.a
-                he?.destination = segment!.b
-                pairsToConnect.append(
-                    (start: he, end: he)
-                )
-            } else if isDestinationClipped {
-                start = he
-                start?.destination = segment!.b
-            } else if isOriginClipped {
-                end = he
-                end?.origin = segment!.a
-            }
-            
-        
-
-            if let s = start, let e = end {
-                pairsToConnect.append(
-                    (start: s, end: e)
-                )
+            if isOriginClipped || isDestinationClipped {
+                if isDestinationClipped {
+                    if firstOut < 0 {
+                        firstOut = hes.count
+                    }
+                    he?.destination = segment?.b
+                }
+                if isOriginClipped {
+                    he?.origin = segment?.a
+                }
+                hes.append((he!, isOriginClipped, isDestinationClipped))
             }
             
             he = he?.next
-            if he === cell.outerComponent || he?.next == nil {
-                break
-            }
+            finish = he === cell.outerComponent
         }
         
-        pairsToConnect.forEach {
-            if let (head, tail) = halfEdgesChain(cell: cell, clippingRect: clipper, start: $0.start!.destination!, end: $0.end!.origin!) {
-                cell.outerComponent = $0.start
-                connect(prev: $0.start, next: head)
-                connect(prev: tail, next: $0.end)
+        var i = firstOut
+        while i < (hes.count + firstOut) {
+            let curIdx = i % hes.count
+            let nextIdx = (i+1) % hes.count
+            
+            if let (head, tail) = halfEdgesChain(
+                cell: cell,
+                clippingRect: clipper,
+                start: hes[curIdx].0.destination!,
+                end: hes[nextIdx].0.origin!
+            ) {
+                cell.outerComponent = hes[curIdx].0
+                connect(prev: hes[curIdx].0, next: head)
+                connect(prev: tail, next: hes[nextIdx].0)
+            }
+            
+            if hes[nextIdx].2 == true {
+                i += 1
+            } else {
+                i += 2
             }
         }
     }
