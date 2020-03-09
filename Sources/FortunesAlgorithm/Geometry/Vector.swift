@@ -28,6 +28,11 @@ extension Vector2D {
     public static func - (left: Vector2D, right: Vector2D) -> Vector2D {
         return Vector2D(dx: right.dx - left.dx, dy: right.dy - left.dy)
     }
+    
+    // Vector magnitude (length)
+    var magnitude: Double {
+        return sqrt(dx*dx + dy*dy)
+    }
 }
 
 

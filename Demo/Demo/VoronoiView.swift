@@ -70,7 +70,7 @@ class VoronoiView: UIView {
 //        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
 //        setNeedsDisplay()
 // ----------------------------------------------------
-        let sites = randomSites(500, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
+        let sites = randomSites(100, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
         diagram = Diagram()
 
         fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
@@ -79,10 +79,9 @@ class VoronoiView: UIView {
 
         
         
-//        var site = gesture.location(in: self).point
+//        var site = Site(x: gesture.location(in: self).point.x.rounded(), y: gesture.location(in: self).point.y.rounded())
 //        site.satellite = colors[curColor % colors.count]
-//        curColor += 1
-//        sites.insert(Site(x: site.x.rounded(), y: site.y.rounded()))
+//        sites.insert(site)
 //
 //        let axis = Double(bounds.width / 2)
 //        var _x: Double
@@ -98,6 +97,7 @@ class VoronoiView: UIView {
 //        diagram = Diagram()
 //        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
 //        setNeedsDisplay()
+//        curColor += 1
     }
     
     /// Draws the receiver’s image within the passed-in rectangle.
@@ -134,9 +134,11 @@ class VoronoiView: UIView {
                 context.drawLine(
                     from: o.cgPoint,
                     to: d.cgPoint,
-                    color: UIColor.black.withAlphaComponent(0.1), lineWidth: 2.0
+                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
                 )
-                context.drawVertex(cell.site)
+                
+                // Site
+//                context.drawVertex(cell.site)
                 
                 he = he?.next
                 finish = he === cell.outerComponent
@@ -144,13 +146,68 @@ class VoronoiView: UIView {
 //            context.drawPolygonFromCCWPoints(points, color: (cell.site.satellite as! UIColor).withAlphaComponent(0.2))
 //            context.drawPolygonFromCCWPoints(points, color: UIColor.random().withAlphaComponent(0.2))
             
-            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 40)
-            context.addPath(path.cgPath)
+            // Centroid
+            let centroid = polygonCentroid(points)
+            context.drawVertex(centroid)
+            
+//            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 10)
+//            context.addPath(path.cgPath)
+            
+            
+            let path2 = UIBezierPath.roundedCornersPath(scaledPolygon(points, scale: 0.85).map { $0.cgPoint }, 10)
+            context.addPath(path2.cgPath)
+            
             context.drawPath(using: .stroke)
         }
     }
 }
 
+func scaledPolygon(_ polygon: [Site], scale: Double) -> [Site] {
+    var result = [Site]()
+    let centroidVector = polygonCentroid(polygon).vector
+    for vertex in polygon {
+        let vertexVector = vertex.vector
+        let v = (centroidVector - vertexVector)
+//        let m = v.magnitude
+//        let decM = v.magnitude - 5.0
+//        let resultVector = v * (decM / m) + centroidVector
+        let resultVector = v * scale + centroidVector
+        result.append(resultVector.point)
+    }
+    
+    return result
+}
+
+func polygonCentroid(_ polygon: [Site]) -> Site {
+    var centroidX: Double = 0
+    var centroidY: Double = 0
+    
+    var signedArea: Double = 0 // Signed area
+    var x0: Double = 0 // Current vertex X
+    var y0: Double = 0 // Current vertex Y
+    var x1: Double = 0 // Next vertex X
+    var y1: Double = 0 // Next vertex Y
+    var area: Double = 0 // Partial signed area
+
+    let vertexCount = polygon.count
+    let vertices = polygon
+    for i in 0..<polygon.count {
+        x0 = vertices[i].x
+        y0 = vertices[i].y
+        x1 = vertices[(i+1) % vertexCount].x
+        y1 = vertices[(i+1) % vertexCount].y
+        area = x0*y1 - x1*y0
+        signedArea += area
+        centroidX += (x0 + x1)*area
+        centroidY += (y0 + y1)*area
+    }
+    
+    signedArea *= 0.5
+    centroidX /= (6.0*signedArea)
+    centroidY /= (6.0*signedArea)
+    
+    return Site(x: centroidX, y: centroidY)
+}
 
 
 private extension CGFloat {
