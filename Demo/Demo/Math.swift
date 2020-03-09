@@ -12,7 +12,7 @@ import CoreGraphics
 ///   - t: Variable parameter
 ///   - shift: Phase shift
 ///   - step: Density step
-///   - n: Number of sinusoids
+///   - n: Number of periods
 /// - Returns: Result of the equation
 public func circularWave(a: CGFloat, c: CGPoint, r: CGFloat, t: CGFloat, shift: CGFloat = 0, step: CGFloat, n: CGFloat = 10) -> CGPoint {
     let x = (r + a * sin(n * (t + step) + shift)) * cos((t + step)) + c.x
@@ -27,3 +27,4 @@ infix operator + : AdditionPrecedence
 public func +(lhs: CGPoint, rhs: CGPoint) -> CGPoint {
     return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
 }
+

@@ -6,9 +6,13 @@
 //  Copyright © 2020 Oleksandr Glagoliev. All rights reserved.
 //
 
+import Foundation
 import UIKit
 
 class VoronoiView: UIView {
+    
+    // AXIS
+    var axipoints = [Site]()
 
     var curTest = 0
     var testCases = [
@@ -56,11 +60,52 @@ class VoronoiView: UIView {
         fatalError()
     }
     
+    
+    // Parametric variable
+    let numberOfPoints: Int = 10
+    let amplitude: CGFloat = 0
+    let numberOfPeriods: CGFloat = 0
+    
     @objc func tap(_ gesture: UITapGestureRecognizer) {
         let clippingRect = Rectangle(
             origin: Site(x: 50, y: 50),
             size: Size(width: Double(bounds.width) - 100, height: Double(bounds.height) - 100)
         )
+
+        
+        let pt = gesture.location(in: self).point
+        let site = Site(
+            x: pt.x.rounded(),
+            y: pt.y.rounded()
+        )
+        
+//        axipoints.append(site)
+        
+        let center = Site(x: Double(bounds.width / 2), y: Double(bounds.height / 2))
+        let guideRadius = CGFloat(center.distance(to: site))
+        let t = CGFloat(atan2(pt.y - center.y, pt.x - center.x))
+        let step = 2 * .pi / CGFloat(numberOfPoints)
+        print(t)
+        for i in 0..<numberOfPoints {
+            let curStep = step * CGFloat(i + 1)
+            var a = circularWave(a: amplitude, c: center.cgPoint, r: guideRadius, t: t, step: curStep, n: numberOfPeriods)
+            axipoints.append(
+                Site(
+                    x: Double(a.x.rounded()),
+                    y: Double(a.y.rounded() + CGFloat(CGFloat.random(in: 0..<10) * CGFloat(eps)))
+                )
+            )
+        }
+        
+        let sites = Set<Site>(axipoints)
+        diagram = Diagram()
+
+        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
+        setNeedsDisplay()
+
+        
+        
+        
 // ----------------------------------------------------
 //        curTest = (curTest) % testCases.count
 //        let sites = testCases[curTest]
@@ -70,14 +115,13 @@ class VoronoiView: UIView {
 //        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
 //        setNeedsDisplay()
 // ----------------------------------------------------
-        let sites = randomSites(100, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
-        diagram = Diagram()
-
-        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
-        setNeedsDisplay()
+//        let sites = randomSites(100, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
+//        diagram = Diagram()
+//
+//        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
+//        setNeedsDisplay()
 // ----------------------------------------------------
 
-        
         
 //        var site = Site(x: gesture.location(in: self).point.x.rounded(), y: gesture.location(in: self).point.y.rounded())
 //        site.satellite = colors[curColor % colors.count]
@@ -100,6 +144,7 @@ class VoronoiView: UIView {
 //        curColor += 1
     }
     
+    
     /// Draws the receiver’s image within the passed-in rectangle.
     ///
     /// - Parameter rect: The portion of the view’s bounds that needs to be updated
@@ -107,56 +152,61 @@ class VoronoiView: UIView {
         guard let context = UIGraphicsGetCurrentContext() else {
             return
         }
-        
+
         context.clear(rect)
         context.setFillColor(UIColor.white.cgColor)
         context.fill(rect)
+    
+        // Draw diagram cells
+        axipoints.forEach { pt in
+            context.drawVertex(pt)
+        }
         
         // Draw diagram cells
         diagram.cells.values.forEach { cell in
             var points: [Site] = []
             var he = cell.outerComponent
-            
+
             var finish = false
             while !finish {
-                
+
                 if he!.toSegment()!.length() < 1.0 {
                     he = he?.next
                     finish = he === cell.outerComponent
                     continue
                 }
-                
+
                 let o = he!.origin!
                 let d = he!.destination!
-                
+
                 points.append(o)
-                
+
                 context.drawLine(
                     from: o.cgPoint,
                     to: d.cgPoint,
                     color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
                 )
-                
+
                 // Site
-//                context.drawVertex(cell.site)
-                
+                context.drawVertex(cell.site)
+
                 he = he?.next
                 finish = he === cell.outerComponent
             }
 //            context.drawPolygonFromCCWPoints(points, color: (cell.site.satellite as! UIColor).withAlphaComponent(0.2))
 //            context.drawPolygonFromCCWPoints(points, color: UIColor.random().withAlphaComponent(0.2))
-            
+
             // Centroid
-            let centroid = polygonCentroid(points)
-            context.drawVertex(centroid)
-            
+//            let centroid = polygonCentroid(points)
+//            context.drawVertex(centroid)
+
 //            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 10)
 //            context.addPath(path.cgPath)
-            
-            
-            let path2 = UIBezierPath.roundedCornersPath(scaledPolygon(points, scale: 0.85).map { $0.cgPoint }, 10)
+
+
+            let path2 = UIBezierPath.roundedCornersPath(scaledPolygon(points, scale: 0.85).map { $0.cgPoint }, 100)
             context.addPath(path2.cgPath)
-            
+
             context.drawPath(using: .stroke)
         }
     }
