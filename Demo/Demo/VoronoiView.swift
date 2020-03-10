@@ -9,42 +9,34 @@
 import Foundation
 import UIKit
 
+enum Mode {
+    case random
+    case edgeCases
+    case axis
+}
+
 class VoronoiView: UIView {
     
     // AXIS
     var axipoints = [Site]()
 
     var curTest = 0
-    var testCases = [
-        broken,
-        testSites_3,
-        testSites_4,
-        testSites_5,
-        testSites_6,
-        randomSites(2, xRange: 100..<300, yRange: 50..<300),
-        randomSites(3, xRange: 100..<300, yRange: 50..<300),
-        randomSites(30, xRange: 100..<300, yRange: 50..<300),
-        randomSites(200, xRange: 100..<300, yRange: 50..<300),
-        randomSites(500, xRange: 50..<500, yRange: 50..<700),
-    ]
+    var testCases = edgeCases
 
     
     private var fs = FortuneSweep()
     var diagram = Diagram()
     var sites = Set<Site>()
-    let colors = [
-        UIColor.rgba(0, 227, 255),
-        UIColor.rgba(95, 75, 182),
-        UIColor.rgba(107, 241, 120),
-        UIColor.rgba(255, 222, 0),
-        UIColor.rgba(0, 34, 97),
-        UIColor.rgba(179, 179, 241),
-        UIColor.rgba(173, 1, 0),
-        UIColor.rgba(85, 5, 39),
-        UIColor.rgba(215, 178, 157),
-        UIColor.rgba(213, 53, 210),
-    ]
+    
+    let colors = [UIColor]()
     var curColor = 0
+    
+    private var clippingRect: Rectangle {
+        Rectangle(
+            origin: Site(x: 50, y: 50),
+            size: Size(width: Double(bounds.width) - 100, height: Double(bounds.height) - 100)
+        )
+    }
     
     // MARK: - Construction -
     override init(frame: CGRect) {
@@ -62,86 +54,88 @@ class VoronoiView: UIView {
     
     
     // Parametric variable
-    let numberOfPoints: Int = 10
-    let amplitude: CGFloat = 0
-    let numberOfPeriods: CGFloat = 0
+    let numberOfAxis: Int = 10
     
     @objc func tap(_ gesture: UITapGestureRecognizer) {
-        let clippingRect = Rectangle(
-            origin: Site(x: 50, y: 50),
-            size: Size(width: Double(bounds.width) - 100, height: Double(bounds.height) - 100)
-        )
+        
+        let seedPoint = gesture.location(in: self)
+        let center = Site(
+            x: Double(bounds.width / 2),
+            y: Double(bounds.height / 2)
+        ).cgPoint
+        let radius = center.distance(to: seedPoint)
 
         
-        let pt = gesture.location(in: self).point
-        let site = Site(
-            x: pt.x.rounded(),
-            y: pt.y.rounded()
+        drawNewPortionOfAxipoints(
+            generateCircularPoints(
+                center: center,
+                seedPoint: seedPoint,
+                radius: radius,
+                numberOfAxis: numberOfAxis
+            )
         )
-        
-//        axipoints.append(site)
-        
-        let center = Site(x: Double(bounds.width / 2), y: Double(bounds.height / 2))
-        let guideRadius = CGFloat(center.distance(to: site))
-        let t = CGFloat(atan2(pt.y - center.y, pt.x - center.x))
-        let step = 2 * .pi / CGFloat(numberOfPoints)
-        print(t)
-        for i in 0..<numberOfPoints {
+//        drawRandomSites(200)
+//        drawNextEdgeCase()
+    }
+    
+    private func generateCircularPoints(
+        center: CGPoint,
+        seedPoint: CGPoint,
+        radius: CGFloat,
+        numberOfAxis: Int
+    ) -> [CGPoint] {
+        var points = [CGPoint]()
+        for i in 0..<numberOfAxis {
+            // Dirty hack to prevent points to share coordinate
+            // Otherwise it may produce glitches
+            let wiggle = CGFloat(CGFloat.random(in: 0..<10) * CGFloat(eps))
+            
+            let theta = CGFloat(
+                atan2(seedPoint.y - center.y, seedPoint.x - center.x)
+            )
+            let step = 2 * .pi / CGFloat(numberOfAxis)
             let curStep = step * CGFloat(i + 1)
-            var a = circularWave(a: amplitude, c: center.cgPoint, r: guideRadius, t: t, step: curStep, n: numberOfPeriods)
-            axipoints.append(
-                Site(
-                    x: Double(a.x.rounded()),
-                    y: Double(a.y.rounded() + CGFloat(CGFloat.random(in: 0..<10) * CGFloat(eps)))
+            let a = circularWave(a: 0, c: center, r: radius, t: theta, step: curStep, n: CGFloat(numberOfAxis))
+            points.append(
+                CGPoint(
+                    x: a.x.rounded(),
+                    y: a.y.rounded() + wiggle
                 )
             )
         }
-        
-        let sites = Set<Site>(axipoints)
+        return points
+    }
+    
+    
+    private func drawNewPortionOfAxipoints(_ points: [CGPoint]) {
+        axipoints.append(contentsOf: points.map { $0.point })
+        redraw(Set<Site>(axipoints))
+    }
+    
+    private func drawRandomSites(_ num: Int) {
+        redraw(
+            randomSites(
+                num,
+                xRange: 50..<Double(bounds.width) - 100,
+                yRange: 50..<Double(bounds.height) - 100
+            )
+        )
+    }
+    
+    private func drawNextEdgeCase() {
+        curTest = (curTest) % testCases.count
+        redraw(testCases[curTest])
+        curTest += 1
+    }
+    
+    private func redraw(_ sites: Set<Site>) {
         diagram = Diagram()
-
-        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
+        fs.compute(
+            sites: sites,
+            diagram: &diagram,
+            clippingRect: clippingRect
+        )
         setNeedsDisplay()
-
-        
-        
-        
-// ----------------------------------------------------
-//        curTest = (curTest) % testCases.count
-//        let sites = testCases[curTest]
-//        curTest += 1
-//        diagram = Diagram()
-//
-//        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
-//        setNeedsDisplay()
-// ----------------------------------------------------
-//        let sites = randomSites(100, xRange: 50..<Double(bounds.width) - 100, yRange: 50..<Double(bounds.height) - 100)
-//        diagram = Diagram()
-//
-//        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
-//        setNeedsDisplay()
-// ----------------------------------------------------
-
-        
-//        var site = Site(x: gesture.location(in: self).point.x.rounded(), y: gesture.location(in: self).point.y.rounded())
-//        site.satellite = colors[curColor % colors.count]
-//        sites.insert(site)
-//
-//        let axis = Double(bounds.width / 2)
-//        var _x: Double
-//        if site.x < axis {
-//            _x = axis + (axis - site.x)
-//        } else {
-//            _x = axis - (site.x - axis)
-//        }
-//        var double = Site(x: _x.rounded(), y: site.y.rounded() + 10*eps)
-//        double.satellite = site.satellite
-//        sites.insert(double)
-//
-//        diagram = Diagram()
-//        fs.compute(sites: sites, diagram: &diagram, clippingRect: clippingRect)
-//        setNeedsDisplay()
-//        curColor += 1
     }
     
     
@@ -200,8 +194,8 @@ class VoronoiView: UIView {
 //            let centroid = polygonCentroid(points)
 //            context.drawVertex(centroid)
 
-//            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 10)
-//            context.addPath(path.cgPath)
+            let path = UIBezierPath.roundedCornersPath(points.map { $0.cgPoint }, 10)
+            context.addPath(path.cgPath)
 
 
             let path2 = UIBezierPath.roundedCornersPath(scaledPolygon(points, scale: 0.85).map { $0.cgPoint }, 100)
@@ -307,7 +301,6 @@ extension UIBezierPath {
         segment = min(segment, min(p_p1, p_p2))
         radius = segment * abs(tan(angle / 2))
         
-        // 5
         let p_o = sqrt(radius.sqr + segment.sqr)
 
         // 6
@@ -378,90 +371,3 @@ func randomSites(_ num: Int, xRange: Range<Double>, yRange: Range<Double>) -> Se
 //    }
     return set
 }
-
-
-var gridLike: [Site] {
-    var res = [Site]()
-    for i in 0..<Int(10) {
-        for j in 0..<Int(10) {
-            res.append(
-                Site(x:(Double(i) + 0.5) * 40, y:(Double(j) + 0.5) * 40)
-            )
-        }
-    }
-    return res
-}
-
-var hellLike: [Site] {
-    var res = [Site]()
-    for i in 0..<Int(10) {
-        for j in 0..<Int(10) {
-            res.append(
-                Site(
-                    x:Double(i) * 40,
-                    y:Double(j) * 40 + ((i % 2 == 0 && j % 2 == 1) ? 40 : 0)
-                )
-            )
-        }
-    }
-    return res
-}
-
-var hexLike: [Site] {
-    var res = [Site]()
-    for i in 0..<Int(10) {
-        for j in 0..<Int(10) {
-            res.append(
-                Site(
-                    x:Double(i) * 40 + Double(j) * 20,
-                    y:Double(j) * 40
-                )
-            )
-        }
-    }
-    return res
-}
-
-
-let testSites_3 = Set<Site>(
-    gridLike.map {
-        Site(x: $0.x + 200, y: $0.y + 200)
-    }
-)
-
-let testSites_4 = Set<Site>(
-    (0...10).map {
-        Site(x: Double($0) * 10, y: Double($0) * 10)
-    }.map {
-        Site(x: $0.x + 200, y: $0.y + 200)
-    } // Diagonal
-)
-
-let testSites_5 = Set<Site>(
-    hexLike.map {
-        Site(x: $0.x + 200, y: $0.y + 200)
-    }
-)
-
-let testSites_6 = Set<Site>(
-    hellLike.map {
-        Site(x: $0.x + 200, y: $0.y + 200)
-    }
-)
-
-let broken = Set<Site>(
-    [
-//        Site(x: 508.0, y: 540.0),
-//        Site(x: 481.0, y: 514.0),
-//        Site(x: 370.0, y: 391.0),
-//        Site(x: 344.0, y: 361.0),
-//        Site(x: 324.0, y: 341.0),
-//        Site(x: 314.0, y: 327.0),
-//        Site(x: 297.0, y: 310.0),
-//        Site(x: 279.0, y: 288.0),
-        Site(x: 251.0, y: 270.0),
-        Site(x: 234.0, y: 248.0),
-        Site(x: 204.0, y: 202.0),
-        Site(x: 166.0, y: 153.0),
-    ]
-)

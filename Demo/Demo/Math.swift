@@ -1,7 +1,9 @@
 import CoreGraphics
 
 /// Equation of sine wave around a circle
-
+///
+///  Includes also a particular case when points will be distributed on the circle
+///
 /// x = (R + a · sin(n·θ)) · cos(θ) + xc
 /// y = (R + a · sin(n·θ)) · sin(θ) + yc
 ///

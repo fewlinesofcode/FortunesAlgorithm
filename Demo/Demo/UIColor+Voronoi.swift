@@ -28,6 +28,19 @@ extension UIColor {
                        blue:  .random(),
                        alpha: 1.0)
     }
+    
+    static let ritaPalette = [
+        UIColor.rgba(0, 227, 255),
+        UIColor.rgba(95, 75, 182),
+        UIColor.rgba(107, 241, 120),
+        UIColor.rgba(255, 222, 0),
+        UIColor.rgba(0, 34, 97),
+        UIColor.rgba(179, 179, 241),
+        UIColor.rgba(173, 1, 0),
+        UIColor.rgba(85, 5, 39),
+        UIColor.rgba(215, 178, 157),
+        UIColor.rgba(213, 53, 210),
+    ]
 }
 
 extension CGFloat {

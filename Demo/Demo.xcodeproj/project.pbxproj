@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A52732B224181C2E009E58C4 /* EdgeCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52732B124181C2E009E58C4 /* EdgeCases.swift */; };
 		A56EF412241014FB0023112F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56EF411241014FB0023112F /* AppDelegate.swift */; };
 		A56EF418241014FE0023112F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A56EF417241014FE0023112F /* Assets.xcassets */; };
 		A56EF41E241014FF0023112F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A56EF41C241014FF0023112F /* LaunchScreen.storyboard */; };
@@ -34,6 +35,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A52732B124181C2E009E58C4 /* EdgeCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeCases.swift; sourceTree = "<group>"; };
 		A56EF40E241014FB0023112F /* Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A56EF411241014FB0023112F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A56EF417241014FE0023112F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -95,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				A56EF452241016200023112F /* Demo.entitlements */,
+				A52732B124181C2E009E58C4 /* EdgeCases.swift */,
 				A56EF450241016020023112F /* Math.swift */,
 				A56EF44C241015BE0023112F /* CGContext+Helpers.swift */,
 				A56EF44A241015BE0023112F /* CGContext+Voronoi.swift */,
@@ -226,6 +229,7 @@
 				A56EF4422410159C0023112F /* LiangBarsky.swift in Sources */,
 				A56EF4402410159C0023112F /* LineSegment.swift in Sources */,
 				A56EF4462410159C0023112F /* Precision.swift in Sources */,
+				A52732B224181C2E009E58C4 /* EdgeCases.swift in Sources */,
 				A56EF4432410159C0023112F /* Size.swift in Sources */,
 				A56EF43C2410159C0023112F /* PriorityQueue.swift in Sources */,
 				A56EF4282410155A0023112F /* VoronoiView.swift in Sources */,
