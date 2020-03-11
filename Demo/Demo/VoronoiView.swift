@@ -53,29 +53,28 @@ class VoronoiView: UIView {
     }
     
     
-    // Parametric variable
-    let numberOfAxis: Int = 10
-    
     @objc func tap(_ gesture: UITapGestureRecognizer) {
         
-        let seedPoint = gesture.location(in: self)
-        let center = Site(
-            x: Double(bounds.width / 2),
-            y: Double(bounds.height / 2)
-        ).cgPoint
-        let radius = center.distance(to: seedPoint)
-
-        
+//        let seedPoint = gesture.location(in: self)
 //        drawNewPortionOfAxipoints(
 //            generateCircularPoints(
-//                center: center,
+//                center: Site(
+//                    x: Double(bounds.width / 2),
+//                    y: Double(bounds.height / 2)
+//                ).cgPoint,
 //                seedPoint: seedPoint,
-//                radius: radius,
-//                numberOfAxis: numberOfAxis
+//                radius: center.distance(to: seedPoint),
+//                numberOfAxis: 1
 //            )
 //        )
-//        drawRandomSites(50)
-        drawNextEdgeCase()
+//        if axipoints.count > 4 {
+//            axipoints = Array<Site>(axipoints.dropFirst(axipoints.count - 5))
+//        }
+
+        
+        drawRandomSites(10)
+        
+//        drawNextEdgeCase()
     }
     
     private func generateCircularPoints(
@@ -88,7 +87,7 @@ class VoronoiView: UIView {
         for i in 0..<numberOfAxis {
             // Dirty hack to prevent points to share coordinate
             // Otherwise it may produce glitches
-            let wiggle = CGFloat(CGFloat.random(in: 0..<10) * CGFloat(eps))
+            let wiggle = CGFloat(CGFloat.random(in: 0..<10) * 0.2)
             
             let theta = CGFloat(
                 atan2(seedPoint.y - center.y, seedPoint.x - center.x)
@@ -98,7 +97,7 @@ class VoronoiView: UIView {
             let a = circularWave(a: 0, c: center, r: radius, t: theta, step: curStep, n: CGFloat(numberOfAxis))
             points.append(
                 CGPoint(
-                    x: a.x.rounded(),
+                    x: a.x.rounded() - wiggle,
                     y: a.y.rounded() + wiggle
                 )
             )
@@ -116,8 +115,8 @@ class VoronoiView: UIView {
         redraw(
             randomSites(
                 num,
-                xRange: 50..<Double(bounds.width) - 100,
-                yRange: 50..<Double(bounds.height) - 100
+                xRange: 150..<Double(bounds.width) - 300,
+                yRange: 150..<Double(bounds.height) - 300
             )
         )
     }
@@ -171,15 +170,15 @@ class VoronoiView: UIView {
                 }
 
                 let o = he!.origin!
-                let d = he!.destination!
-
                 points.append(o)
-
-                context.drawLine(
-                    from: o.cgPoint,
-                    to: d.cgPoint,
-                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
-                )
+                
+                
+//                let d = he!.destination!
+//                context.drawLine(
+//                    from: o.cgPoint,
+//                    to: d.cgPoint,
+//                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
+//                )
 
                 // Site
 //                context.drawVertex(cell.site)
@@ -206,10 +205,11 @@ class VoronoiView: UIView {
 //                UIBezierPath.roundedCornersPath(paddedHull, 10).cgPath
 //            )
             
-            for i in 0..<4 {
-                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 5)
+            for i in 0..<40 {
+                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 8)
                 context.addPath(
-                    UIBezierPath.roundedCornersPath(paddedHull, 5).cgPath
+                    //CGFloat(i) * 2
+                    UIBezierPath.roundedCornersPath(paddedHull, 0).cgPath
                 )
             }
             
