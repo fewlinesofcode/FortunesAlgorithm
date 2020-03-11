@@ -32,6 +32,7 @@
 		A56EF44E241015BE0023112F /* UIColor+Voronoi.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56EF44B241015BE0023112F /* UIColor+Voronoi.swift */; };
 		A56EF44F241015BE0023112F /* CGContext+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56EF44C241015BE0023112F /* CGContext+Helpers.swift */; };
 		A56EF451241016020023112F /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56EF450241016020023112F /* Math.swift */; };
+		CEAA25DB2419484D0010A217 /* UIBezierPath+RoundedCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = CEAA25DA2419484D0010A217 /* UIBezierPath+RoundedCorners.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +64,7 @@
 		A56EF44C241015BE0023112F /* CGContext+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGContext+Helpers.swift"; sourceTree = "<group>"; };
 		A56EF450241016020023112F /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		A56EF452241016200023112F /* Demo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Demo.entitlements; sourceTree = "<group>"; };
+		CEAA25DA2419484D0010A217 /* UIBezierPath+RoundedCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBezierPath+RoundedCorners.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +110,7 @@
 				A56EF417241014FE0023112F /* Assets.xcassets */,
 				A56EF41C241014FF0023112F /* LaunchScreen.storyboard */,
 				A56EF41F241014FF0023112F /* Info.plist */,
+				CEAA25DA2419484D0010A217 /* UIBezierPath+RoundedCorners.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -237,6 +240,7 @@
 				A56EF4482410159C0023112F /* Rectangle.swift in Sources */,
 				A56EF451241016020023112F /* Math.swift in Sources */,
 				A56EF43E2410159C0023112F /* FortuneSweep.swift in Sources */,
+				CEAA25DB2419484D0010A217 /* UIBezierPath+RoundedCorners.swift in Sources */,
 				A56EF4442410159C0023112F /* Vector.swift in Sources */,
 				A56EF43F2410159C0023112F /* Debug.swift in Sources */,
 				A56EF44E241015BE0023112F /* UIColor+Voronoi.swift in Sources */,
