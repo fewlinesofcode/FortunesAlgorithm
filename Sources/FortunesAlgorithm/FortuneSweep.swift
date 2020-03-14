@@ -367,7 +367,7 @@ public class FortuneSweep {
             }
         }
         
-        for cell in diagram.cells.values {
+        for cell in diagram.cells {
             // Step 2:
             // Complete incomplete cells
             if cell.outerComponent?.prev == nil || cell.outerComponent?.next == nil {

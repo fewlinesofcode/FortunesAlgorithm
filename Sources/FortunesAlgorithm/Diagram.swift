@@ -8,7 +8,7 @@
 import Foundation
 
 public class Diagram {
-    public private(set) var cells = [Site: Cell]()
+    public private(set) var cells = [Cell]()
     public private(set) var vertices = [Vertex]()
     
     public init() { }
@@ -16,12 +16,8 @@ public class Diagram {
     func createCell(_ arc: Arc) {
         let p = arc.point!
         let cell = Cell(site: p)
-        cells[p] = cell
+        cells.append(cell)
         arc.cell = cell
-    }
-    
-    func removeCell(_ cell: Cell) {
-        cells.removeValue(forKey: cell.site)
     }
     
     func createHalfEdge(_ cell: Cell) -> HalfEdge {
@@ -33,6 +29,12 @@ public class Diagram {
         return he
     }
     
+    deinit {
+        print("""
+        
+        DEINIT
+        """)
+    }
     
 }
 
@@ -54,6 +56,11 @@ public class Cell {
     public init(site: Site) {
         self.site = site
     }
+    
+    deinit {
+        outerComponent?.next = nil
+        outerComponent?.prev = nil
+    }
 }
 
 /// The half‐edge record of a half‐edge e stores pointer to:
@@ -70,8 +77,9 @@ public class HalfEdge {
     
     public weak var twin: HalfEdge?
     public weak var incidentFace: Cell?
-    public weak var prev: HalfEdge?
-    public var next: HalfEdge?
+    
+    public var prev: HalfEdge?
+    public weak var next: HalfEdge?
 }
 
 public extension HalfEdge {
