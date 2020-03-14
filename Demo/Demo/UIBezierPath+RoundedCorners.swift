@@ -81,7 +81,10 @@ extension UIBezierPath {
         path.addArc(withCenter: o, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: angle < .pi)
     }
     
-    public static func roundedCornersPath(_ pts: [CGPoint], _ r: CGFloat) -> UIBezierPath {
+    public static func roundedCornersPath(_ pts: [CGPoint], _ r: CGFloat) -> UIBezierPath? {
+        guard pts.isEmpty == false else {
+            return nil
+        }
         let path = UIBezierPath()
         for i in 1...pts.count {
             let prev = pts[i-1]

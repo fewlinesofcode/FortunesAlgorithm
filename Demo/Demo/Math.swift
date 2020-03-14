@@ -109,13 +109,14 @@ func scaledPolygon(_ polygon: [CGPoint], scale: CGFloat) -> [CGPoint] {
     return result
 }
 
-func paddedPolygon(_ polygon: [CGPoint], padding: CGFloat) -> [CGPoint] {
+func paddedPolygon(_ polygon: [CGPoint], padding: CGFloat, minCenterToVertexDistance: CGFloat = 0) -> [CGPoint] {
     var result = [CGPoint]()
     let centroid = polygonCentroid(polygon)
     for vertex in polygon {
         let centroidToVertexVector = (centroid - vertex)
         let magnitude = centroidToVertexVector.magnitude
-        let paddedMagnitude = magnitude + padding
+
+        let paddedMagnitude = max(magnitude + padding, minCenterToVertexDistance)
         let resultVector = centroidToVertexVector * (paddedMagnitude / magnitude)
         result.append(resultVector + centroid)
     }

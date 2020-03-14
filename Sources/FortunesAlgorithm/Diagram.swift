@@ -29,11 +29,9 @@ public class Diagram {
         return he
     }
     
-    deinit {
-        print("""
-        
-        DEINIT
-        """)
+    public func clear() {
+        cells.removeAll()
+        vertices.removeAll()
     }
     
 }
