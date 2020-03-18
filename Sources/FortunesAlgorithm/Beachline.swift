@@ -4,8 +4,8 @@ final class Arc {
     
     private(set) var point: Site?
     var event: Event?
-    weak var prev: Arc?
-    weak var next: Arc?
+    unowned var prev: Arc?
+    unowned var next: Arc?
     
     var leftHalfEdge: HalfEdge?
     var rightHalfEdge: HalfEdge?

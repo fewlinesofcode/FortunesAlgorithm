@@ -72,7 +72,7 @@ class VoronoiView: UIView {
 //        }
 
         
-        drawRandomSites(10)
+        drawRandomSites(100)
         
 //        drawNextEdgeCase()
     }
@@ -156,7 +156,7 @@ class VoronoiView: UIView {
 //        }
         
         // Draw diagram cells
-        diagram.cells.values.forEach { cell in
+        diagram.cells.forEach { cell in
             var points: [Site] = []
             var he = cell.outerComponent
 
@@ -205,11 +205,11 @@ class VoronoiView: UIView {
 //                UIBezierPath.roundedCornersPath(paddedHull, 10).cgPath
 //            )
             
-            for i in 0..<40 {
+            for i in 0..<1 {
                 let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 8)
                 context.addPath(
                     //CGFloat(i) * 2
-                    UIBezierPath.roundedCornersPath(paddedHull, 0).cgPath
+                    UIBezierPath.roundedCornersPath(paddedHull, 0)!.cgPath
                 )
             }
             
