@@ -12,11 +12,9 @@ class GameScene: SKScene {
     
     var fs = FortuneSweep()
     var diagram = Diagram()
-    var points = [SKShapeNode]()
     
-    var shouldRedraw = true
-    var elapsedTime: TimeInterval = 0
-    var shape: SKShapeNode = SKShapeNode()
+    var balls = [SKShapeNode]()
+    var diagramNode: SKShapeNode = SKShapeNode()
     
     private var clippingRect: Rectangle {
         Rectangle(
@@ -27,82 +25,82 @@ class GameScene: SKScene {
         
     private func redraw(_ sites: Set<Site>) {
 //        removeAllChildren()
-        
-        diagram.clear()
-        fs.compute(
-            sites: sites,
-            diagram: &diagram,
-            clippingRect: clippingRect
-        )
-        
-        
         let totalPath = UIBezierPath()
         
-        diagram.cells.forEach { cell in
-            var points: [Site] = []
-            var he = cell.outerComponent
+        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+            self.diagram.clear()
+            self.fs.compute(
+                sites: sites,
+                diagram: &self.diagram,
+                clippingRect: self.clippingRect
+            )
             
-            var finish = false
-            while !finish {
+            self.diagram.cells.forEach { cell in
+                var points: [Site] = []
+                var he = cell.outerComponent
                 
-                if he!.toSegment()!.length() < 1.0 {
+                var finish = false
+                while !finish {
+                    
+                    if he!.toSegment()!.length() < 1.0 {
+                        he = he?.next
+                        finish = he === cell.outerComponent
+                        continue
+                    }
+                    
+                    let o = he!.origin!
+                    points.append(o)
+                    
+                    
                     he = he?.next
                     finish = he === cell.outerComponent
-                    continue
                 }
                 
-                let o = he!.origin!
-                points.append(o)
-                
-                
-                he = he?.next
-                finish = he === cell.outerComponent
+                let hullVertices = points.map { $0.cgPoint }
+                for i in 0..<hullVertices.count {
+                    if i == 0 {
+                        totalPath.move(to: hullVertices[i])
+                    } else { totalPath.addLine(to: hullVertices[i])}
+                }
+                totalPath.close()
             }
             
-            let hullVertices = points.map { $0.cgPoint }
-            
-            for i in 0..<1 {
-                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
-                if let path = UIBezierPath.roundedCornersPath(paddedHull, 10) {
-                    totalPath.append(path)
-                }
+            DispatchQueue.main.async {
+                self.diagramNode.path = totalPath.cgPath
+                self.diagramNode.strokeColor = UIColor.black
+                self.diagramNode.fillColor = .clear
             }
         }
-        
-        shape.path = totalPath.cgPath
-        shape.strokeColor = UIColor.black
-//        shape.lineWidth = 0
-        shape.fillColor = .clear
     }
     
     override func didMove(to view: SKView) {
-        addChild(shape)
+        addChild(diagramNode)
         
         let offset: Double = 50
         let lbx = offset
         let lby = offset
         let ubx = Double(view.bounds.width) - 2 * offset
         let uby = Double(view.bounds.height) - 2 * offset
-        let randomPoints = randomSites(50, xRange: lbx..<ubx, yRange: lby..<uby)
-        let r: CGFloat = 10
-        points = randomPoints.map {
+        let randomPoints = hexLike//randomSites(50, xRange: lbx..<ubx, yRange: lby..<uby)
+        let r: CGFloat = 20
+        balls = randomPoints.map {
             let point = SKShapeNode(circleOfRadius: r)
             point.position = $0.cgPoint
             point.fillColor = .red
             
-            let body = SKPhysicsBody(circleOfRadius: r)
-            body.affectedByGravity = false
-            body.linearDamping = 0
-            body.mass = 0.0
-            
-            point.physicsBody = body
+//            let body = SKPhysicsBody(circleOfRadius: r)
+//            body.affectedByGravity = false
+//            body.linearDamping = 0
+//            body.mass = 0.0
+//
+//            point.physicsBody = body
             point.isHidden = false
             
             addChild(point)
             return point
         }
         
-        redraw(Set<Site>(points.map { $0.position.point }))
+        redraw(Set<Site>(balls.map { $0.position.point }))
     }
     
     func getRandomPoint(withinRect rect: CGRect) -> CGPoint{
@@ -129,24 +127,39 @@ class GameScene: SKScene {
     }
     
     
+    var hexLike: [Site] {
+        var num = 5
+        let step: Double = 50
+        var res = [Site]()
+        for i in 0..<num {
+            for j in 0..<num {
+                res.append(
+                    Site(
+                        x:Double(i) * step + Double(j) * step / 2 + 200,
+                        y:Double(j) * step + 200
+                    )
+                )
+            }
+        }
+        return res
+    }
+    
     func touchDown(atPoint pos : CGPoint) {
-        shouldRedraw = true
     }
     
     func touchMoved(toPoint pos : CGPoint) {
         let spriteAtPoint = atPoint(pos)
-        if spriteAtPoint != shape {
+        if spriteAtPoint != diagramNode {
             atPoint(pos).position = pos
         }
-        redraw(Set<Site>(points.map { $0.position.point }))
     }
     
     func touchUp(atPoint pos : CGPoint) {
-        points.forEach {
-            $0.physicsBody!.affectedByGravity = true
-        }
-        
-//        redraw(Set<Site>(sites))
+        let ball = atPoint(pos)
+        if ball == diagramNode { return }
+//        balls.removeAll(where: { $0 == ball})
+//        ball.removeFromParent()
+//        ball.physicsBody!.affectedByGravity = true
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -163,6 +176,10 @@ class GameScene: SKScene {
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+    }
+    
+    override func update(_ currentTime: TimeInterval) {
+        redraw(Set<Site>(balls.map { $0.position.point }))
     }
 }
 

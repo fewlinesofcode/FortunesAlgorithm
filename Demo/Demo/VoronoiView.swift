@@ -72,9 +72,9 @@ class VoronoiView: UIView {
 //        }
 
         
-        drawRandomSites(100)
+//        drawRandomSites(100)
         
-//        drawNextEdgeCase()
+        drawNextEdgeCase()
     }
     
     private func generateCircularPoints(
@@ -173,15 +173,15 @@ class VoronoiView: UIView {
                 points.append(o)
                 
                 
-//                let d = he!.destination!
-//                context.drawLine(
-//                    from: o.cgPoint,
-//                    to: d.cgPoint,
-//                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
-//                )
+                let d = he!.destination!
+                context.drawLine(
+                    from: o.cgPoint,
+                    to: d.cgPoint,
+                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
+                )
 
                 // Site
-//                context.drawVertex(cell.site)
+                context.drawVertex(cell.site)
 
                 he = he?.next
                 finish = he === cell.outerComponent
@@ -200,18 +200,18 @@ class VoronoiView: UIView {
 //                UIBezierPath.roundedCornersPath(scaledHull, 10).cgPath
 //            )
 //
-//            let paddedHull = paddedPolygon(hullVertices, padding: -15.0)
-//            context.addPath(
-//                UIBezierPath.roundedCornersPath(paddedHull, 10).cgPath
-//            )
+            let paddedHull = paddedPolygon(hullVertices, padding: -15.0)
+            context.addPath(
+                UIBezierPath.roundedCornersPath(paddedHull, 10)!.cgPath
+            )
             
-            for i in 0..<1 {
-                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 8)
-                context.addPath(
-                    //CGFloat(i) * 2
-                    UIBezierPath.roundedCornersPath(paddedHull, 0)!.cgPath
-                )
-            }
+//            for i in 0..<1 {
+//                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 8)
+//                context.addPath(
+//                    //CGFloat(i) * 2
+//                    UIBezierPath.roundedCornersPath(paddedHull, 0)!.cgPath
+//                )
+//            }
             
             context.drawPath(using: .stroke)
         }
