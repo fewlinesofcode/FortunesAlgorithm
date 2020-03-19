@@ -9,7 +9,7 @@ final class Arc {
     
     var leftHalfEdge: HalfEdge?
     var rightHalfEdge: HalfEdge?
-    unowned var cell: Cell!
+    weak var cell: Cell!
     
     var right: Arc?
     var left: Arc?

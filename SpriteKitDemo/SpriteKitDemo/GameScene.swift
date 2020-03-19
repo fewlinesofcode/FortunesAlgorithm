@@ -24,38 +24,30 @@ class GameScene: SKScene {
     }
         
     private func redraw(_ sites: Set<Site>) {
-//        removeAllChildren()
         let totalPath = UIBezierPath()
         
-//        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
-            self.diagram.clear()
-            self.fs.compute(
-                sites: sites,
-                diagram: &self.diagram,
-                clippingRect: self.clippingRect
-            )
+        diagram.clear()
+        fs.compute(
+            sites: sites,
+            diagram: &self.diagram,
+            clippingRect: self.clippingRect
+        )
+        
+        self.diagram.cells.forEach { cell in
+            var points: [Site] = []
+            var he = cell.outerComponent
             
-            self.diagram.cells.forEach { cell in
-                var points: [Site] = []
-                var he = cell.outerComponent
+            var finish = false
+            while !finish {
                 
-                var finish = false
-                while !finish {
-                    
-//                    if he!.toSegment()!.length() < 1.0 {
-//                        he = he?.next
-//                        finish = he === cell.outerComponent
-//                        continue
-//                    }
-                    
-                    let o = he!.origin!
-                    points.append(o)
-                    
-                    
-                    he = he?.next
-                    finish = he === cell.outerComponent
-                }
+                let o = he!.origin!
+                points.append(o)
                 
+                
+                he = he?.next
+                finish = he === cell.outerComponent
+            }
+            
 //                let hullVertices = points.map { $0.cgPoint }
 //                for i in 0..<hullVertices.count {
 //                    if i == 0 {
@@ -63,23 +55,20 @@ class GameScene: SKScene {
 //                    } else { totalPath.addLine(to: hullVertices[i])}
 //                }
 //                totalPath.close()
-                
-                let hullVertices = points.map { $0.cgPoint }
-                
-                for i in 0..<1 {
-                    let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
-                    if let path = UIBezierPath.roundedCornersPath(paddedHull, 10) {
-                        totalPath.append(path)
-                    }
+            
+            let hullVertices = points.map { $0.cgPoint }
+            
+            for i in 0..<1 {
+                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
+                if let path = UIBezierPath.roundedCornersPath(paddedHull, 10) {
+                    totalPath.append(path)
                 }
             }
-            
-//            DispatchQueue.main.async {
-                self.diagramNode.path = totalPath.cgPath
-                self.diagramNode.strokeColor = UIColor.black
-                self.diagramNode.fillColor = .clear
-//            }
-//        }
+        }
+        
+        diagramNode.path = totalPath.cgPath
+        diagramNode.strokeColor = UIColor.black
+        diagramNode.fillColor = .clear
     }
     
     override func didMove(to view: SKView) {
@@ -90,19 +79,19 @@ class GameScene: SKScene {
         let lby = offset
         let ubx = Double(view.bounds.width) - 2 * offset
         let uby = Double(view.bounds.height) - 2 * offset
-        let randomPoints = hexLike//randomSites(50, xRange: lbx..<ubx, yRange: lby..<uby)
+        let randomPoints = randomSites(50, xRange: lbx..<ubx, yRange: lby..<uby)
         let r: CGFloat = 20
         balls = randomPoints.map {
             let point = SKShapeNode(circleOfRadius: r)
             point.position = $0.cgPoint
             point.fillColor = .red
             
-//            let body = SKPhysicsBody(circleOfRadius: r)
-//            body.affectedByGravity = false
-//            body.linearDamping = 0
-//            body.mass = 0.0
-//
-//            point.physicsBody = body
+            let body = SKPhysicsBody(circleOfRadius: r)
+            body.affectedByGravity = false
+            body.linearDamping = 0
+            body.mass = 0.0
+
+            point.physicsBody = body
             point.isHidden = false
             
             addChild(point)
@@ -148,7 +137,6 @@ class GameScene: SKScene {
                         y:Double(j) * step + 200
                     )
                 )
-                print(res.last!)
             }
         }
         return res
