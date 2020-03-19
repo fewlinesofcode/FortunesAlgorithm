@@ -76,8 +76,8 @@ public class HalfEdge {
     public weak var twin: HalfEdge?
     public weak var incidentFace: Cell?
     
-    public var prev: HalfEdge?
-    public weak var next: HalfEdge?
+    public weak var prev: HalfEdge?
+    public var next: HalfEdge?
 }
 
 public extension HalfEdge {
