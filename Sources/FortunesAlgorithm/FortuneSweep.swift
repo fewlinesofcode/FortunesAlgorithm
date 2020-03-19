@@ -79,7 +79,10 @@ public class FortuneSweep {
         if beachline.isEmpty {
             let root = beachline.insertRootArc(point: event.point)
             firstSiteY = event.point.y
-            container = clipper
+            
+            let padding: Double = 20
+            container = .rect(from: clipper, with: padding)
+//            container = clipper
             
             /// Create new **Cell** record in **Voronoi Diagram**
             container.expandToContainPoint(event.point)
@@ -96,7 +99,7 @@ public class FortuneSweep {
         /// We replace *y* with an arbitrary value big enough to cover our case. (`yVal`)
         if firstSiteY == sweepLineY {
             container.expandToContainPoint(event.point)
-            let yVal: Double = .leastNormalMagnitude
+            let yVal: Double = -1000000//.leastNormalMagnitude
             let arc = beachline.handleSpecialArcInsertionCase(event.point)
 
             /// 1. Create new **Cell** record in **Voronoi Diagram**
@@ -397,8 +400,8 @@ public class FortuneSweep {
         
         let clipper = container!.toClipper()
         
-        last.destination = lb_clip(last.toSegment()!, clipper: clipper).resultSegment!.b
-        first.origin = lb_clip(first.toSegment()!, clipper: clipper).resultSegment!.a
+        last.destination = lb_clip(last.toSegment()!, clipper: clipper).resultSegment?.b
+        first.origin = lb_clip(first.toSegment()!, clipper: clipper).resultSegment?.a
         
         guard let start = last.destination, let end = first.origin else {
             return

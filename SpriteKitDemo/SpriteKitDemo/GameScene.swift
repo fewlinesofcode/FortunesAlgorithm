@@ -27,7 +27,7 @@ class GameScene: SKScene {
 //        removeAllChildren()
         let totalPath = UIBezierPath()
         
-        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
+//        DispatchQueue.global(qos: .userInteractive).async { [unowned self] in
             self.diagram.clear()
             self.fs.compute(
                 sites: sites,
@@ -42,11 +42,11 @@ class GameScene: SKScene {
                 var finish = false
                 while !finish {
                     
-                    if he!.toSegment()!.length() < 1.0 {
-                        he = he?.next
-                        finish = he === cell.outerComponent
-                        continue
-                    }
+//                    if he!.toSegment()!.length() < 1.0 {
+//                        he = he?.next
+//                        finish = he === cell.outerComponent
+//                        continue
+//                    }
                     
                     let o = he!.origin!
                     points.append(o)
@@ -56,21 +56,30 @@ class GameScene: SKScene {
                     finish = he === cell.outerComponent
                 }
                 
+//                let hullVertices = points.map { $0.cgPoint }
+//                for i in 0..<hullVertices.count {
+//                    if i == 0 {
+//                        totalPath.move(to: hullVertices[i])
+//                    } else { totalPath.addLine(to: hullVertices[i])}
+//                }
+//                totalPath.close()
+                
                 let hullVertices = points.map { $0.cgPoint }
-                for i in 0..<hullVertices.count {
-                    if i == 0 {
-                        totalPath.move(to: hullVertices[i])
-                    } else { totalPath.addLine(to: hullVertices[i])}
+                
+                for i in 0..<1 {
+                    let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
+                    if let path = UIBezierPath.roundedCornersPath(paddedHull, 10) {
+                        totalPath.append(path)
+                    }
                 }
-                totalPath.close()
             }
             
-            DispatchQueue.main.async {
+//            DispatchQueue.main.async {
                 self.diagramNode.path = totalPath.cgPath
                 self.diagramNode.strokeColor = UIColor.black
                 self.diagramNode.fillColor = .clear
-            }
-        }
+//            }
+//        }
     }
     
     override func didMove(to view: SKView) {
@@ -128,17 +137,18 @@ class GameScene: SKScene {
     
     
     var hexLike: [Site] {
-        var num = 5
+        let num = 5
         let step: Double = 50
         var res = [Site]()
         for i in 0..<num {
-            for j in 0..<num {
+            for j in 0..<3 {
                 res.append(
                     Site(
                         x:Double(i) * step + Double(j) * step / 2 + 200,
                         y:Double(j) * step + 200
                     )
                 )
+                print(res.last!)
             }
         }
         return res
@@ -150,8 +160,9 @@ class GameScene: SKScene {
     func touchMoved(toPoint pos : CGPoint) {
         let spriteAtPoint = atPoint(pos)
         if spriteAtPoint != diagramNode {
-            atPoint(pos).position = pos
+            atPoint(pos).position = CGPoint(x: pos.x.rounded(), y: pos.y.rounded())
         }
+        redraw(Set<Site>(balls.map { $0.position.point }))
     }
     
     func touchUp(atPoint pos : CGPoint) {
@@ -179,7 +190,7 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        redraw(Set<Site>(balls.map { $0.position.point }))
+//        redraw(Set<Site>(balls.map { $0.position.point }))
     }
 }
 

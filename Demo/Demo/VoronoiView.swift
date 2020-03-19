@@ -67,12 +67,14 @@ class VoronoiView: UIView {
 //                numberOfAxis: 1
 //            )
 //        )
+        
+        
 //        if axipoints.count > 4 {
 //            axipoints = Array<Site>(axipoints.dropFirst(axipoints.count - 5))
 //        }
 
         
-//        drawRandomSites(100)
+//        drawRandomSites(200)
         
         drawNextEdgeCase()
     }
@@ -87,7 +89,7 @@ class VoronoiView: UIView {
         for i in 0..<numberOfAxis {
             // Dirty hack to prevent points to share coordinate
             // Otherwise it may produce glitches
-            let wiggle = CGFloat(CGFloat.random(in: 0..<10) * 0.2)
+            let wiggle = CGFloat.zero//CGFloat(CGFloat.random(in: 0..<10) * 0.002)
             
             let theta = CGFloat(
                 atan2(seedPoint.y - center.y, seedPoint.x - center.x)
@@ -161,7 +163,7 @@ class VoronoiView: UIView {
             var he = cell.outerComponent
 
             var finish = false
-            while !finish {
+            while !finish  {
 
                 if he!.toSegment()!.length() < 1.0 {
                     he = he?.next

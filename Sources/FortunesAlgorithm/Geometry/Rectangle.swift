@@ -93,6 +93,13 @@ extension Rectangle {
             getLine(.bottom)
         ]
     }
+    
+    public static func rect(from sourceRect: Rectangle, with padding: Double) -> Rectangle {
+        Rectangle(
+            origin: Site(x: sourceRect.tl.x - padding, y: sourceRect.tl.y - padding),
+            size: Size(width: sourceRect.width + 2 * padding, height: sourceRect.height + 2 * padding)
+        )
+    }
 }
 
 

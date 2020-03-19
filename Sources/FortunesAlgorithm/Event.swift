@@ -30,19 +30,6 @@ extension Event: Comparable {
     }
     
     static func < (lhs: Event, rhs: Event) -> Bool {
-        if lhs.point == rhs.point {
-            
-            guard
-                let lp = lhs.arc?.point,
-                let rp = rhs.arc?.point else {
-                    return true
-            }
-            
-            if lp.y == rp.y {
-                return lp.x < rp.x
-            }
-            return lp.y < rp.y
-        }
         if lhs.point.y == rhs.point.y {
             return lhs.point.x < rhs.point.x
         }

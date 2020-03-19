@@ -60,7 +60,6 @@ extension UIBezierPath {
         let dy = p.y * 2 - c1.y - c2.y
 
         let p_c = (dx.sqr + dy.sqr).squareRoot()
-
         // Find Circle origin
         let o = CGPoint(
             x: p.x - dx * p_o / p_c,
@@ -72,13 +71,21 @@ extension UIBezierPath {
         let endAngle = (atan2((c2.y - o.y), (c2.x - o.x))).positiveAngle
 
 
-        if isStart {
-            path.move(to: c1)
-        } else {
-            path.addLine(to: c1)
-        }
         
-        path.addArc(withCenter: o, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: angle < .pi)
+        if !radius.isNaN && !o.x.isNaN && !o.y.isNaN {
+            if isStart {
+                path.move(to: c1)
+            } else {
+                path.addLine(to: c1)
+            }
+            path.addArc(withCenter: o, radius: radius, startAngle: startAngle, endAngle: endAngle, clockwise: angle < .pi)
+        } else {
+            if isStart {
+                path.move(to: p)
+            } else {
+                path.addLine(to: p)
+            }
+        }
     }
     
     public static func roundedCornersPath(_ pts: [CGPoint], _ r: CGFloat) -> UIBezierPath? {

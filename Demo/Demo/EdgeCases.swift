@@ -9,6 +9,7 @@
 import Foundation
 
 var edgeCases = [
+    broken0,
     broken,
     testSites_3,
     testSites_4,
@@ -106,3 +107,11 @@ let broken = Set<Site>(
         Site(x: 166.0, y: 153.0),
     ]
 )
+    
+let broken0 = Set<Site>(
+    [
+        Site(x: 241.0, y: 293.0),
+        Site(x: 166.0, y: 192.0),
+    ]
+)
+
