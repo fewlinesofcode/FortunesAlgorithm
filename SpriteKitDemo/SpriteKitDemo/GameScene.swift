@@ -33,36 +33,30 @@ class GameScene: SKScene {
             clippingRect: self.clippingRect
         )
         
-        self.diagram.cells.forEach { cell in
-            var points: [Site] = []
-            var he = cell.outerComponent
+        diagram.cells.forEach { cell in
+//            let hullVertices = cell
+//                .hullVerticesCCW()
+//                .map { $0.cgPoint }
             
-            var finish = false
-            while !finish {
-                
-                let o = he!.origin!
-                points.append(o)
-                
-                
-                he = he?.next
-                finish = he === cell.outerComponent
-            }
-            
-//                let hullVertices = points.map { $0.cgPoint }
-//                for i in 0..<hullVertices.count {
-//                    if i == 0 {
-//                        totalPath.move(to: hullVertices[i])
-//                    } else { totalPath.addLine(to: hullVertices[i])}
+//            let numRepeats = 1
+//            let radius: CGFloat = 0
+//            for i in 0..<numRepeats {
+//                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
+//                if let path = UIBezierPath.roundedCornersPath(paddedHull, radius) {
+//                    totalPath.append(path)
 //                }
-//                totalPath.close()
+//            }
             
-            let hullVertices = points.map { $0.cgPoint }
+//            let centroid = polygonCentroid(hullVertices)
+//
+//            for vtx in hullVertices {
+//                totalPath.move(to: centroid)
+//                totalPath.addLine(to: vtx)
+//            }
             
-            for i in 0..<1 {
-                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
-                if let path = UIBezierPath.roundedCornersPath(paddedHull, 10) {
-                    totalPath.append(path)
-                }
+            for n in cell.neighbours() {
+                totalPath.move(to: cell.site.cgPoint)
+                totalPath.addLine(to: n.site.cgPoint)
             }
         }
         
@@ -88,8 +82,8 @@ class GameScene: SKScene {
             
             let body = SKPhysicsBody(circleOfRadius: r)
             body.affectedByGravity = false
-            body.linearDamping = 0
-            body.mass = 0.0
+            body.linearDamping = 0.9
+            body.mass = 2.0
 
             point.physicsBody = body
             point.isHidden = false
@@ -148,17 +142,20 @@ class GameScene: SKScene {
     func touchMoved(toPoint pos : CGPoint) {
         let spriteAtPoint = atPoint(pos)
         if spriteAtPoint != diagramNode {
-            atPoint(pos).position = CGPoint(x: pos.x.rounded(), y: pos.y.rounded())
+            spriteAtPoint.position = CGPoint(x: pos.x.rounded(), y: pos.y.rounded())
+            
         }
-        redraw(Set<Site>(balls.map { $0.position.point }))
     }
     
     func touchUp(atPoint pos : CGPoint) {
         let ball = atPoint(pos)
         if ball == diagramNode { return }
-//        balls.removeAll(where: { $0 == ball})
-//        ball.removeFromParent()
-//        ball.physicsBody!.affectedByGravity = true
+        
+        let force = CGVector(
+            dx: CGFloat.random(in: -300...300),
+            dy: CGFloat.random(in: -300...300)
+        )
+        ball.physicsBody?.applyImpulse(force)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -178,7 +175,7 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-//        redraw(Set<Site>(balls.map { $0.position.point }))
+        redraw(Set<Site>(balls.map { $0.position.point }))
     }
 }
 

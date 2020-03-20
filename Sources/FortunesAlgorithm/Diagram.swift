@@ -61,6 +61,47 @@ public class Cell {
     }
 }
 
+public extension Cell {
+    
+    
+    /// Returns hell vertices of the cell
+    func hullVerticesCCW() -> [Vertex] {
+        var vertices: [Vertex] = []
+        guard var he = outerComponent else {
+            return []
+        }
+        
+        var finish = false
+        while !finish {
+            vertices.append(he.origin!)
+            he = he.next!
+            finish = he === outerComponent
+        }
+        
+        return vertices
+    }
+    
+    
+    /// Returns all the neighbours of specific cell
+    func neighbours() -> [Cell] {
+        var neighbours = [Cell]()
+        guard var he = outerComponent else {
+            return []
+        }
+        
+        var finish = false
+        while !finish {
+            if let neighbour = he.twin?.incidentFace {
+                neighbours.append(neighbour)
+            }
+            he = he.next!
+            finish = he === outerComponent
+        }
+        return neighbours
+    }
+    
+}
+
 /// The half‐edge record of a half‐edge e stores pointer to:
 /// • Origin(e)
 /// • Twin of e, e.twin or twin(e)

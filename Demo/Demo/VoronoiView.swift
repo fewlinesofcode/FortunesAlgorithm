@@ -55,18 +55,18 @@ class VoronoiView: UIView {
     
     @objc func tap(_ gesture: UITapGestureRecognizer) {
         
-//        let seedPoint = gesture.location(in: self)
-//        drawNewPortionOfAxipoints(
-//            generateCircularPoints(
-//                center: Site(
-//                    x: Double(bounds.width / 2),
-//                    y: Double(bounds.height / 2)
-//                ).cgPoint,
-//                seedPoint: seedPoint,
-//                radius: center.distance(to: seedPoint),
-//                numberOfAxis: 1
-//            )
-//        )
+        let seedPoint = gesture.location(in: self)
+        drawNewPortionOfAxipoints(
+            generateCircularPoints(
+                center: Site(
+                    x: Double(bounds.width / 2),
+                    y: Double(bounds.height / 2)
+                ).cgPoint,
+                seedPoint: seedPoint,
+                radius: center.distance(to: seedPoint),
+                numberOfAxis: 10
+            )
+        )
         
         
 //        if axipoints.count > 4 {
@@ -76,7 +76,7 @@ class VoronoiView: UIView {
         
 //        drawRandomSites(200)
         
-        drawNextEdgeCase()
+//        drawNextEdgeCase()
     }
     
     private func generateCircularPoints(
@@ -179,7 +179,7 @@ class VoronoiView: UIView {
                 context.drawLine(
                     from: o.cgPoint,
                     to: d.cgPoint,
-                    color: UIColor.black.withAlphaComponent(0.05), lineWidth: 2.0
+                    color: UIColor.black.withAlphaComponent(1), lineWidth: 2.0
                 )
 
                 // Site
@@ -191,7 +191,7 @@ class VoronoiView: UIView {
             
 //            context.drawPolygonFromCCWPoints(points, color: UIColor.random().withAlphaComponent(0.2))
 
-            let hullVertices = points.map { $0.cgPoint }
+//            let hullVertices = points.map { $0.cgPoint }
             
 //            context.addPath(
 //                UIBezierPath.roundedCornersPath(hullVertices, 10).cgPath
@@ -201,11 +201,11 @@ class VoronoiView: UIView {
 //            context.addPath(
 //                UIBezierPath.roundedCornersPath(scaledHull, 10).cgPath
 //            )
-//
-            let paddedHull = paddedPolygon(hullVertices, padding: -15.0)
-            context.addPath(
-                UIBezierPath.roundedCornersPath(paddedHull, 10)!.cgPath
-            )
+
+//            let paddedHull = paddedPolygon(hullVertices, padding: -15.0)
+//            context.addPath(
+//                UIBezierPath.roundedCornersPath(paddedHull, 10)!.cgPath
+//            )
             
 //            for i in 0..<1 {
 //                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 8)
