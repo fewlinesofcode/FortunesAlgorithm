@@ -14,7 +14,8 @@ class GameScene: SKScene {
     var diagram = Diagram()
     
     var balls = [SKShapeNode]()
-    var diagramNode: SKShapeNode = SKShapeNode()
+    var voronoiDiagramNode = SKShapeNode()
+    var delaunayDiagramNode = SKShapeNode()
     
     private var clippingRect: Rectangle {
         Rectangle(
@@ -24,7 +25,8 @@ class GameScene: SKScene {
     }
         
     private func redraw(_ sites: Set<Site>) {
-        let totalPath = UIBezierPath()
+        let voronoiPath = UIBezierPath()
+        let delaunayPath = UIBezierPath()
         
         diagram.clear()
         fs.compute(
@@ -34,39 +36,46 @@ class GameScene: SKScene {
         )
         
         diagram.cells.forEach { cell in
-//            let hullVertices = cell
-//                .hullVerticesCCW()
-//                .map { $0.cgPoint }
+            let hullVertices = cell
+                .hullVerticesCCW()
+                .map { $0.cgPoint }
             
-//            let numRepeats = 1
-//            let radius: CGFloat = 0
-//            for i in 0..<numRepeats {
-//                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
-//                if let path = UIBezierPath.roundedCornersPath(paddedHull, radius) {
-//                    totalPath.append(path)
-//                }
-//            }
+            let numRepeats = 1
+            let radius: CGFloat = 0
+            for i in 0..<numRepeats {
+                let paddedHull = paddedPolygon(hullVertices, padding: CGFloat(-i) * 10)
+                if let path = UIBezierPath.roundedCornersPath(paddedHull, radius) {
+                    voronoiPath.append(path)
+                }
+            }
             
 //            let centroid = polygonCentroid(hullVertices)
 //
 //            for vtx in hullVertices {
-//                totalPath.move(to: centroid)
-//                totalPath.addLine(to: vtx)
+//                voronoiPath.move(to: centroid)
+//                voronoiPath.addLine(to: vtx)
 //            }
             
+            
             for n in cell.neighbours() {
-                totalPath.move(to: cell.site.cgPoint)
-                totalPath.addLine(to: n.site.cgPoint)
+                delaunayPath.move(to: cell.site.cgPoint)
+                delaunayPath.addLine(to: n.site.cgPoint)
             }
         }
+        voronoiDiagramNode.path = voronoiPath.cgPath
+        voronoiDiagramNode.strokeColor = UIColor.black
+        voronoiDiagramNode.lineWidth = 3.0
+        voronoiDiagramNode.fillColor = .clear
         
-        diagramNode.path = totalPath.cgPath
-        diagramNode.strokeColor = UIColor.black
-        diagramNode.fillColor = .clear
+        delaunayDiagramNode.path = delaunayPath.cgPath
+        delaunayDiagramNode.strokeColor = UIColor.green
+        delaunayDiagramNode.lineWidth = 1.0
+        delaunayDiagramNode.fillColor = .clear
     }
     
     override func didMove(to view: SKView) {
-        addChild(diagramNode)
+        addChild(voronoiDiagramNode)
+        addChild(delaunayDiagramNode)
         
         let offset: Double = 50
         let lbx = offset
@@ -141,7 +150,7 @@ class GameScene: SKScene {
     
     func touchMoved(toPoint pos : CGPoint) {
         let spriteAtPoint = atPoint(pos)
-        if spriteAtPoint != diagramNode {
+        if spriteAtPoint != voronoiDiagramNode {
             spriteAtPoint.position = CGPoint(x: pos.x.rounded(), y: pos.y.rounded())
             
         }
@@ -149,7 +158,7 @@ class GameScene: SKScene {
     
     func touchUp(atPoint pos : CGPoint) {
         let ball = atPoint(pos)
-        if ball == diagramNode { return }
+        if ball == voronoiDiagramNode { return }
         
         let force = CGVector(
             dx: CGFloat.random(in: -300...300),
