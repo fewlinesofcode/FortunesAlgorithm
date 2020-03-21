@@ -45,3 +45,9 @@ fortuneSweep.compute(
 1. ([Fortunes Algorithm. Part 1](https://jacquesheunis.com/post/fortunes-algorithm/) and [Fortunes Algorithm Part 2](https://jacquesheunis.com/post/fortunes-algorithm-implementation/) by Jacques Heunis (@jacquesh)
 2. [Fortune's algorithm, the details](https://pvigier.github.io/2018/11/18/fortune-algorithm-details.html) by Pierre Vigier (@pvigier)
 
+# Contact
+
+Feel free to ask questions, report bugs and submit pull requests!
+
+You can contact me by email: [oglagoliev@gmail.com](oglagoliev@gmail.com) or 
+follow me on Twitter: [@fewlinesofcode](https://twitter.com/fewlinesofcode) 
