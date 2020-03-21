@@ -24,7 +24,8 @@ let package = Package(
         ),
         .testTarget(
             name: "FortunesAlgorithmTests",
-            dependencies: ["FortunesAlgorithm"]
+            dependencies: ["FortunesAlgorithm"],
+            path: "Tests"
         ),
     ]
 )
