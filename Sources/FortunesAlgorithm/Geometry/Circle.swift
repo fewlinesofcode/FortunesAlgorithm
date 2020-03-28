@@ -25,12 +25,12 @@ import Foundation
 
 // MARK: - Circle
 public struct Circle {
-    public let center: Site
+    public let center: Point
     public let radius: Double
     
     /// Defines circle by three points
     /// See: https://www.xarg.org/2018/02/create-a-circle-out-of-three-points/
-    public init?(p1: Site, p2: Site, p3: Site) {
+    public init?(p1: Point, p2: Point, p3: Point) {
         let x1 = p1.x
         let y1 = p1.y
         let x2 = p2.x
@@ -57,7 +57,7 @@ public struct Circle {
         let x = -b / (2 * a)
         let y = -c / (2 * a)
         
-        center = Site(x: x, y: y)
+        center = Point(x: x, y: y)
         radius = hypot(x - x1, y - y1)
     }
     
@@ -66,7 +66,7 @@ public struct Circle {
     /// - Parameters:
     ///   - center: Circle origin (center)
     ///   - radius: Circle radius
-    public init(center: Site, radius: Double) {
+    public init(center: Point, radius: Double) {
         self.center = center
         self.radius = radius
     }
@@ -74,8 +74,8 @@ public struct Circle {
 
 extension Circle {
     // Returns a point with maximum *Y* coordinate
-    public var bottomPoint: Site {
-        Site(
+    public var bottomPoint: Point {
+        Point(
             x: center.x,
             y: center.y + radius
         )

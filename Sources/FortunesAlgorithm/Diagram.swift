@@ -49,13 +49,13 @@ public class Diagram {
         cells.removeAll()
         vertices.removeAll()
     }
-    
 }
 
 
 /// The vertex record of a vertex v stores the coordinates of v.
 /// It also stores a pointer IncidentEdge(v) to an arbitrary half‐edge that has v as its origin
 public typealias Vertex = Site
+public typealias Point = Site
 
 
 /// Stores pointer to:
@@ -78,7 +78,6 @@ public class Cell {
 }
 
 public extension Cell {
-    
     
     /// Returns hell vertices of the cell
     func hullVerticesCCW() -> [Vertex] {

@@ -298,31 +298,7 @@ extension Beachline {
     func updateSweeplineY(_ y: Double) {
         sweeplineY = y
     }
-    
-//    private func arcAbovePoint(_ p: Point) -> Arc {
-//        var x: Arc = root!
-//        var found = false
-//        while !found {
-//            assert(x.point != nil)
-//            let (l, r) = x.bounds(sweeplineY)
-//            if p.x < l {
-//                x = x.left!
-//            } else if p.x > r {
-//                x = x.right!
-//            }
-//            else if abs(p.x - l) < eps {
-//                x = x.prev!
-//                found = true
-//            } else if abs(p.x - r) < eps {
-//                found = true
-//            }
-//            else {
-//                found = true
-//            }
-//        }
-//        return x
-//    }
-    
+        
     func addAsLeftChild(_ x: Arc, _ y: Arc) {
         y.left = x
         x.parent = y

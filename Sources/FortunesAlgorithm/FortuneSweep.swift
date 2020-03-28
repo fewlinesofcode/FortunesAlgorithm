@@ -27,20 +27,45 @@ public class FortuneSweep {
     /// Service Data Structures
     private var eventQueue: PriorityQueue<Event>!
     private var beachline: Beachline!
-    private var sweepLineY: Double = 0
+    private var sweepLineY: Double = 0 {
+        didSet {
+            watcher?.updateSweepline(y: sweepLineY)
+        }
+    }
     private var firstSiteY: Double?
     
-    private var container: Rectangle!
+    private var container: Rectangle! {
+        didSet {
+            watcher?.updateContainer(rectangle: container)
+        }
+    }
     private var clipper: Rectangle!
     
     /// Debug Data structures
     private var logger: FortuneSweepLogging?
-    private var currentStep: Int = 0
+    private var watcher: FortuneSweepProgressWatching?
+    private var currentStep: Int = 0 {
+        didSet {
+            watcher?.step = currentStep
+        }
+    }
     /// Result Data Structure
     private(set) var diagram: Diagram!
     
-    public init(logger: FortuneSweepLogging? = nil) {
-        self.logger = logger
+    
+    /// Initialises new FortuneSweep instance
+    /// NB: `logger` and especially `watcher` will affect performance!
+    /// Use them only for debug purposes!
+    ///
+    /// - Parameters:
+    ///   - logger: Optional. Calls `log` function when importand events happen
+    ///   - watcher: Optional. **Affects performance!** Tracks diagram building process. May be used for visualisation as it includes useful scaffolding.
+    public init(
+        logger: FortuneSweepLogging? = nil,
+        intermediate: FortuneSweepProgressWatching? = nil
+    ) {
+        self.logger = nil//logger
+        self.watcher = intermediate
     }
     
     public func compute(
@@ -50,12 +75,15 @@ public class FortuneSweep {
     ) {
         self.diagram = diagram
         self.clipper = clippingRect
-        let filtered = sites
-            .filter { clipper.contains($0) }
-            .map { Event(point: $0) }
-       
+        let filteredSites = sites.filter { clipper.contains($0) }
+            
+        let events = filteredSites.map { Event(point: $0) }
+        
+        /// Intermediate state
+        watcher?.prepare(sites: filteredSites, clipper: clippingRect)
+        
         /// Diagram is a whole plane. Do nothing
-        if filtered.isEmpty {
+        if events.isEmpty {
             logger?.log("Computation done. No sites inside defined area!", level: .info)
             return
         }
@@ -66,10 +94,10 @@ public class FortuneSweep {
         
         eventQueue = PriorityQueue(
             ascending: true,
-            startingValues: filtered
+            startingValues: events
         )
         
-        logger?.log("Computation started!", level: .info)
+        logger?.log("\n\nComputation started!", level: .info)
         var finished = false
         while !finished {
             step()
@@ -85,7 +113,7 @@ public class FortuneSweep {
     /// 2. Check the event type and process the event appropriately
     private func step() {
         currentStep += 1
-        logger?.log("Step: \(currentStep)", level: .info)
+        logger?.log("\nStep: \(currentStep)", level: .info)
         
         if let event = eventQueue.pop() {
             switch event.kind {
@@ -102,6 +130,7 @@ public class FortuneSweep {
     /// - Parameter event: **Site Event** to process
     private func processSiteEvent(_ event: Event) {
         logger?.log("Site Event: \(event.point)", level: .info)
+        watcher?.siteEvent(site: event.point)
         
         /// #Step 1:
         /// Update **Sweepline** position
@@ -125,6 +154,7 @@ public class FortuneSweep {
             /// Create new **Cell** record in **Voronoi Diagram**
             container.expandToContainPoint(event.point)
             diagram.createCell(root)
+            watcher?.createCell(cell: root.cell)
             return
         }
         
@@ -144,6 +174,7 @@ public class FortuneSweep {
 
             /// 1. Create new **Cell** record in **Voronoi Diagram**
             diagram.createCell(arc)
+            watcher?.createCell(cell: arc.cell)
 
             /// 2. Create proper *HalfEdge* records. Arc with the same *y* can only appear
             /// to the right of existing one as in case of *y* coordinate is shared they are sorted by *x*
@@ -172,8 +203,17 @@ public class FortuneSweep {
         /// Create new **Cell** record in **Voronoi Diagram**
         container.expandToContainPoint(event.point)
         diagram.createCell(newArc)
+        watcher?.createCell(cell: newArc.cell)
         
-        
+        /// Notify `intermediate` if needed
+        if let intermediate = self.watcher {
+            let parabola = Parabola(focus: newArc.prev!.point!, directrixY: sweepLineY)
+            let breakPoint = Point(
+                x: event.point.x,
+                y: parabola.resolve(x: event.point.x)
+            )
+            intermediate.updateCurentBreakpoint(point: breakPoint)
+        }
         
         /// #Step 3:
         /// If the arc we broke has circle event, than this event is false-alarm and has to be removed
@@ -246,6 +286,10 @@ public class FortuneSweep {
             newArc.rightHalfEdge = newArc.leftHalfEdge
             next.leftHalfEdge = prev.rightHalfEdge
         }
+        
+        if let intermediate = self.watcher {
+            intermediate.updateBeachline(arcs: beachline.getArcs())
+        }
     }
     
     
@@ -297,6 +341,8 @@ public class FortuneSweep {
         nextArc.leftHalfEdge = nextLHE
         
         makeTwins(prevArc.rightHalfEdge, nextArc.leftHalfEdge)
+        
+        watcher?.createVertex(vertex: vertex)
     }
     
     
@@ -304,6 +350,7 @@ public class FortuneSweep {
     /// - Parameter event: **Circle Event**
     private func processCircleEvent(_ event: Event) {
         logger?.log("Circle Event: \(event.point)", level: .info)
+        watcher?.circleEvent(point: event.point)
         
         guard let arc = event.arc,
               let left = arc.prev,
@@ -350,8 +397,6 @@ public class FortuneSweep {
     ///   - arc: **Beachline** arc to add event
     ///   - circle: Circle represented by three points
     private func createCircleEvent(_ arc: Arc) {
-        logger?.log("Create Circle Event for Arc: \(arc.point!)", level: .info)
-        
         let left = arc.prev
         let right = arc.next
         guard let circle = checkCircleEvent(left: left, mid: arc, right: right) else {
@@ -366,6 +411,9 @@ public class FortuneSweep {
         arc.event = event
         
         eventQueue.push(event)
+        
+        logger?.log("Create Circle Event for Arc: \(arc.point!)", level: .info)
+        watcher?.addUpcomingCircleEvent(circle: event.circle!)
     }
     
     /// Removes circle event from the **Priority Queue** and removes event from the **Arc**
@@ -379,10 +427,11 @@ public class FortuneSweep {
                 return
         }
         
+        watcher?.removeFalseAlarmCircleEvent(circle: event.circle!)
+        logger?.log("Remove Circle Event for Arc: \(arc.point!)", level: .info)
+        
         eventQueue.removeAll(event)
         arc.event = nil
-        
-        logger?.log("Remove Circle Event for Arc: \(arc.point!)", level: .info)
     }
     
   
@@ -712,5 +761,30 @@ extension Vector2D {
     
     var point: Site {
         Site(x: dx, y: dy)
+    }
+}
+
+public struct BeachlineSegment {
+    let parabola: Parabola
+    let lBoundX: Double
+    let rBoundX: Double
+}
+
+extension Beachline {
+    public func getArcs() -> [BeachlineSegment] {
+        var arcs = [BeachlineSegment]()
+        var arc = minimum
+        while arc != nil {
+            let (lb, rb) = arc!.bounds(sweeplineY)
+            arcs.append(
+                BeachlineSegment(
+                    parabola: Parabola(focus: arc!.point!, directrixY: sweeplineY),
+                    lBoundX: lb,
+                    rBoundX: rb
+                )
+            )
+            arc = arc?.next
+        }
+        return arcs
     }
 }
