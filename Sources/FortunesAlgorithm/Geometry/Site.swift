@@ -36,6 +36,12 @@ public struct Site {
     }
 }
 
+extension Site: CustomStringConvertible {
+    public var description: String {
+        return "(x: \(x), y: \(y))"
+    }
+}
+
 extension Site: Hashable {
     public static func == (lhs: Site, rhs: Site) -> Bool {
         lhs.x == rhs.x

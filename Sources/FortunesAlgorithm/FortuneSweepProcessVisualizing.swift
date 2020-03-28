@@ -24,7 +24,7 @@
 
 import Foundation
 
-public protocol VoronoiDebugging: class {
+public protocol FortuneSweepProcessVisualizing: class {
     var notVisitedSites: [Site] { get set }
     var visitedSites: [Site] { get set }
     var sweeplineY: Double { get set }
@@ -39,8 +39,7 @@ public protocol VoronoiDebugging: class {
             rBound: Double
         )
         ] { get set }
-    var box: Rectangle? { get set }
-    var potentialEdges: [LineSegment] { get set }
+    var clipper: Rectangle? { get set }
     var numSteps: Int? { get set }
     var curStep: Int { get set }
 }

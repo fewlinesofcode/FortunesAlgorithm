@@ -27,16 +27,21 @@ public class FortuneSweep {
     /// Service Data Structures
     private var eventQueue: PriorityQueue<Event>!
     private var beachline: Beachline!
-    private var sweepLineY = Double(0)
+    private var sweepLineY: Double = 0
     private var firstSiteY: Double?
     
     private var container: Rectangle!
     private var clipper: Rectangle!
     
+    /// Debug Data structures
+    private var logger: FortuneSweepLogging?
+    private var currentStep: Int = 0
     /// Result Data Structure
-    private(set) var diagram = Diagram()
+    private(set) var diagram: Diagram!
     
-    public init() { }
+    public init(logger: FortuneSweepLogging? = nil) {
+        self.logger = logger
+    }
     
     public func compute(
         sites: Set<Site>,
@@ -48,9 +53,13 @@ public class FortuneSweep {
         let filtered = sites
             .filter { clipper.contains($0) }
             .map { Event(point: $0) }
+       
         /// Diagram is a whole plane. Do nothing
-        if filtered.isEmpty { return }
-        
+        if filtered.isEmpty {
+            logger?.log("Computation done. No sites inside defined area!", level: .info)
+            return
+        }
+        currentStep = 0
         sweepLineY = 0
         firstSiteY = nil
         beachline = Beachline()
@@ -74,6 +83,9 @@ public class FortuneSweep {
     /// 1. Pop an event from the event queue
     /// 2. Check the event type and process the event appropriately
     private func step() {
+        currentStep += 1
+        logger?.log("Step: \(currentStep)", level: .info)
+        
         if let event = eventQueue.pop() {
             switch event.kind {
                 case .site:
@@ -88,6 +100,8 @@ public class FortuneSweep {
     /// Processes **Site event** and performs all the necessary actions
     /// - Parameter event: **Site Event** to process
     private func processSiteEvent(_ event: Event) {
+        logger?.log("Site Event: \(event.point)", level: .info)
+        
         /// #Step 1:
         /// Update **Sweepline** position
         sweepLineY = event.point.y
@@ -100,12 +114,12 @@ public class FortuneSweep {
         /// Case 1: (Always present once)
         /// Beachline is empty. Create beachline root Arc and return
         if beachline.isEmpty {
+            logger?.log("Site Event first occurence. Root arc inserted for Site: \(event.point)", level: .info)
             let root = beachline.insertRootArc(point: event.point)
             firstSiteY = event.point.y
             
-            let padding: Double = 20
+            let padding: Double = 20 // Arbitrary padding to make sure that container contains clipping rect
             container = .rect(from: clipper, with: padding)
-//            container = clipper
             
             /// Create new **Cell** record in **Voronoi Diagram**
             container.expandToContainPoint(event.point)
@@ -121,6 +135,8 @@ public class FortuneSweep {
         ///     - *y* coordinate will lay somewhere far above the points.
         /// We replace *y* with an arbitrary value big enough to cover our case. (`yVal`)
         if firstSiteY == sweepLineY {
+            logger?.log("Site Event degenerate case (Existing Sites share Y coodinate (\(sweepLineY)) with new Site) for Site: \(event.point)", level: .warning)
+            
             container.expandToContainPoint(event.point)
             let yVal: Double = -1000000//.leastNormalMagnitude
             let arc = beachline.handleSpecialArcInsertionCase(event.point)
@@ -137,7 +153,7 @@ public class FortuneSweep {
             arc.leftHalfEdge = diagram.createHalfEdge(arc.cell!)
             arc.leftHalfEdge?.origin = p
             makeTwins(prev.rightHalfEdge, arc.leftHalfEdge)
-
+            
             /// There is no sense to check for circle event when we encounter degenerate case because all the sites are colinear
             return
         }
@@ -155,6 +171,8 @@ public class FortuneSweep {
         /// Create new **Cell** record in **Voronoi Diagram**
         container.expandToContainPoint(event.point)
         diagram.createCell(newArc)
+        
+        
         
         /// #Step 3:
         /// If the arc we broke has circle event, than this event is false-alarm and has to be removed
@@ -212,6 +230,8 @@ public class FortuneSweep {
             
             prev.rightHalfEdge = lTwin
             next.leftHalfEdge = rTwin
+            
+            logger?.log("Site Event degenerate case (Breapoint has the same X coordinate as a Site: \(event.point)", level: .warning)
         } else {
             /// Regular and most likely case. Here we break the arc, create **HalfEdge** records and set proper pointers between them
             next.cell = prev.cell
@@ -282,6 +302,8 @@ public class FortuneSweep {
     /// Processes circle event and performs all the necessary actions
     /// - Parameter event: **Circle Event**
     private func processCircleEvent(_ event: Event) {
+        logger?.log("Circle Event: \(event.point)", level: .info)
+        
         guard let arc = event.arc,
               let left = arc.prev,
               let right = arc.next
@@ -327,6 +349,8 @@ public class FortuneSweep {
     ///   - arc: **Beachline** arc to add event
     ///   - circle: Circle represented by three points
     private func createCircleEvent(_ arc: Arc) {
+        logger?.log("Create Circle Event for Arc: \(arc.point!)", level: .info)
+        
         let left = arc.prev
         let right = arc.next
         guard let circle = checkCircleEvent(left: left, mid: arc, right: right) else {
@@ -356,6 +380,8 @@ public class FortuneSweep {
         
         eventQueue.removeAll(event)
         arc.event = nil
+        
+        logger?.log("Remove Circle Event for Arc: \(arc.point!)", level: .info)
     }
     
   
@@ -364,9 +390,7 @@ public class FortuneSweep {
     /// 2. Complete incomplete cells
     /// 3. Clip cells to clipping rectangle
     private func terminate() {
-//        if diagram.cells.count == 1 {
-//            return
-//        }
+        logger?.log("Event Queue is empty. Diagram bounding started.", level: .info)
         
         // Step 1:
         // Bound incomplete arcs
@@ -404,6 +428,8 @@ public class FortuneSweep {
             // Clip cells
             clipCell(cell, clippingRect: clipper)
         }
+        
+        logger?.log("Done!", level: .info)
     }
     
     /// Some of the cells will not be completed (Are not looped linked list of half-edges)
@@ -502,7 +528,8 @@ public class FortuneSweep {
         var finish = false
         while !finish {
             guard let segmentToClip = he?.toSegment() else {
-                fatalError("[FATAL ERROR]: Cannot create segment from the `HalfEdge`!")
+                logger?.log("Fatal Error! Malformed Half-Edge!", level: .critical)
+                fatalError()
             }
             
             let (isOriginClipped, isDestinationClipped, segment) = lb_clip(segmentToClip, clipper: clippingRect.toClipper())
@@ -679,10 +706,10 @@ extension Site {
 
 extension Vector2D {
     var normal: Vector2D {
-        return Vector2D(dx: -dy, dy: dx)
+        Vector2D(dx: -dy, dy: dx)
     }
     
     var point: Site {
-        return Site(x: dx, y: dy)
+        Site(x: dx, y: dy)
     }
 }
