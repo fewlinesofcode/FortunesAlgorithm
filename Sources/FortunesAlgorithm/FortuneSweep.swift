@@ -71,8 +71,9 @@ public class FortuneSweep {
     public func compute(
         sites: Set<Site>,
         diagram: inout Diagram,
-        clippingRect: Rectangle
-    ) {
+        clippingRect: Rectangle,
+        maxStepsCount: Int = -1
+    ) -> Bool {
         self.diagram = diagram
         self.clipper = clippingRect
         let filteredSites = sites.filter { clipper.contains($0) }
@@ -85,8 +86,9 @@ public class FortuneSweep {
         /// Diagram is a whole plane. Do nothing
         if events.isEmpty {
             logger?.log("Computation done. No sites inside defined area!", level: .info)
-            return
+            return true
         }
+        
         currentStep = 0
         sweepLineY = 0
         firstSiteY = nil
@@ -98,14 +100,15 @@ public class FortuneSweep {
         )
         
         logger?.log("\n\nComputation started!", level: .info)
-        var finished = false
-        while !finished {
+        
+        while !eventQueue.isEmpty && currentStep != maxStepsCount {
             step()
-            finished = eventQueue.isEmpty
         }
         if eventQueue.isEmpty {
             terminate()
+            return true
         }
+        return false
     }
     
     /// Performs one step of the algorithm
