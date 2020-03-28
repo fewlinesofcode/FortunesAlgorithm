@@ -69,6 +69,7 @@ public class FortuneSweep {
             startingValues: filtered
         )
         
+        logger?.log("Computation started!", level: .info)
         var finished = false
         while !finished {
             step()
