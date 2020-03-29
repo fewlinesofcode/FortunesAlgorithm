@@ -62,10 +62,10 @@ public class FortuneSweep {
     ///   - watcher: Optional. **Affects performance!** Tracks diagram building process. May be used for visualisation as it includes useful scaffolding.
     public init(
         logger: FortuneSweepLogging? = nil,
-        intermediate: FortuneSweepProgressWatching? = nil
+        watcher: FortuneSweepProgressWatching? = nil
     ) {
         self.logger = logger
-        self.watcher = intermediate
+        self.watcher = watcher
     }
     
     public func compute(
