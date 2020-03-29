@@ -64,7 +64,7 @@ public class FortuneSweep {
         logger: FortuneSweepLogging? = nil,
         intermediate: FortuneSweepProgressWatching? = nil
     ) {
-        self.logger = nil//logger
+        self.logger = logger
         self.watcher = intermediate
     }
     
@@ -104,6 +104,17 @@ public class FortuneSweep {
         while !eventQueue.isEmpty && currentStep != maxStepsCount {
             step()
         }
+        if eventQueue.isEmpty {
+            terminate()
+            return true
+        }
+        return false
+    }
+    
+    
+    /// Runs one step of an algorithm
+    func debug_step() -> Bool {
+        step()
         if eventQueue.isEmpty {
             terminate()
             return true
@@ -731,26 +742,6 @@ public class FortuneSweep {
 
 
 // MARK: - Helpers and extensions -
-extension FortuneSweep {
-    func run(maxSteps: Int) {
-        var curStep = 0
-        if maxSteps > 0 {
-            while curStep != maxSteps {
-                step()
-                curStep += 1
-            }
-        } else {
-            while !eventQueue.isEmpty {
-                step()
-            }
-        }
-        
-        if eventQueue.isEmpty {
-            terminate()
-        }
-    }
-}
-
 extension Site {
     var vector: Vector2D {
         Vector2D(dx: x, dy: y)
