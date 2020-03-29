@@ -33,7 +33,6 @@ public class FortuneSweep {
         }
     }
     private var firstSiteY: Double?
-    
     private var container: Rectangle! {
         didSet {
             watcher?.updateContainer(rectangle: container)
@@ -49,6 +48,7 @@ public class FortuneSweep {
             watcher?.step = currentStep
         }
     }
+    private var isTerminated: Bool!
     /// Result Data Structure
     private(set) var diagram: Diagram!
     
@@ -98,7 +98,7 @@ public class FortuneSweep {
             ascending: true,
             startingValues: events
         )
-        
+        isTerminated = false
         logger?.log("\n\nComputation started!", level: .info)
         
         while !eventQueue.isEmpty && currentStep != maxStepsCount {
@@ -116,7 +116,11 @@ public class FortuneSweep {
     func debug_step() -> Bool {
         step()
         if eventQueue.isEmpty {
-            terminate()
+            if isTerminated == false {
+                terminate()
+            } else {
+                logger?.log("Algorithm terminated", level: .info)
+            }
             return true
         }
         return false
@@ -454,6 +458,7 @@ public class FortuneSweep {
     /// 2. Complete incomplete cells
     /// 3. Clip cells to clipping rectangle
     private func terminate() {
+        isTerminated = true
         logger?.log("Event Queue is empty. Diagram bounding started.", level: .info)
         
         // Step 1:
