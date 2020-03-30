@@ -304,8 +304,8 @@ public class FortuneSweep {
             next.leftHalfEdge = prev.rightHalfEdge
         }
         
-        if let intermediate = self.watcher {
-            intermediate.updateBeachline(arcs: beachline.getArcs())
+        if let watcher = self.watcher {
+            watcher.updateBeachline(arcs: beachline.getArcs())
         }
     }
     
@@ -405,6 +405,10 @@ public class FortuneSweep {
         /// Do the same for the triple where the former right neighbor is the middle arc.
         createCircleEvent(left)
         createCircleEvent(right)
+        
+        if let watcher = self.watcher {
+            watcher.updateBeachline(arcs: beachline.getArcs())
+        }
     }
     
     /// Creates circle event for the coresponding **Arc** in the **Beachline**
