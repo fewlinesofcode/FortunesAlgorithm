@@ -130,10 +130,9 @@ public class FortuneSweep {
     /// 1. Pop an event from the event queue
     /// 2. Check the event type and process the event appropriately
     private func step() {
-        currentStep += 1
-        logger?.log("\nStep: \(currentStep)", level: .info)
-        
         if let event = eventQueue.pop() {
+            currentStep += 1
+            logger?.log("\nStep: \(currentStep)", level: .info)
             switch event.kind {
                 case .site:
                     processSiteEvent(event)
