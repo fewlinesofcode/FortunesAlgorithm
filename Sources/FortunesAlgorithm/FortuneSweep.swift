@@ -203,6 +203,8 @@ public class FortuneSweep {
             arc.leftHalfEdge?.origin = p
             makeTwins(prev.rightHalfEdge, arc.leftHalfEdge)
             
+            // Debug
+            watcher?.addHalfEdges(hes: [prev.rightHalfEdge!, arc.leftHalfEdge!])
             /// There is no sense to check for circle event when we encounter degenerate case because all the sites are colinear
             return
         }
@@ -289,6 +291,7 @@ public class FortuneSweep {
             prev.rightHalfEdge = lTwin
             next.leftHalfEdge = rTwin
             
+            watcher?.addHalfEdges(hes: [lhe, lTwin, rhe, rTwin])
             logger?.log("Site Event degenerate case (Breapoint has the same X coordinate as a Site: \(event.point)", level: .warning)
         } else {
             /// Regular and most likely case. Here we break the arc, create **HalfEdge** records and set proper pointers between them
@@ -302,6 +305,8 @@ public class FortuneSweep {
             
             newArc.rightHalfEdge = newArc.leftHalfEdge
             next.leftHalfEdge = prev.rightHalfEdge
+            
+            watcher?.addHalfEdges(hes: [prev.rightHalfEdge!, newArc.leftHalfEdge!])
         }
         
         if let watcher = self.watcher {
@@ -359,7 +364,9 @@ public class FortuneSweep {
         
         makeTwins(prevArc.rightHalfEdge, nextArc.leftHalfEdge)
         
+        // Debug
         watcher?.createVertex(vertex: vertex)
+        watcher?.addHalfEdges(hes: [prevRHE, nextLHE])
     }
     
     
@@ -489,6 +496,8 @@ public class FortuneSweep {
             }
         }
         
+        watcher?.boundingDone()
+        
         for cell in diagram.cells {
             // Step 2:
             // Complete incomplete cells
@@ -501,6 +510,7 @@ public class FortuneSweep {
             clipCell(cell, clippingRect: clipper)
         }
         
+        watcher?.workDone()
         logger?.log("Done!", level: .info)
     }
     
@@ -586,6 +596,7 @@ public class FortuneSweep {
                 connect(prev: cell.outerComponent, next: he)
                 cell.outerComponent = he
                 
+                watcher?.addHalfEdges(hes: [he])
             }
             connect(prev: cell.outerComponent, next: firstHE)
             assert(cell.outerComponent?.destination == firstHE?.origin)
@@ -676,6 +687,8 @@ public class FortuneSweep {
             
             connect(prev: he, next: newHE)
             he = newHE
+            
+            watcher?.addHalfEdges(hes: [newHE])
         }
         he.destination = end
         return (head, he)

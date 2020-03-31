@@ -80,4 +80,14 @@ public protocol FortuneSweepProgressWatching: class {
     /// Called when new Cell is added to the diagram
     /// - Parameter cell: Cell
     func createCell(cell: Cell)
+    
+    /// Called when HalfEdges are added to the diagram
+    /// - Parameter hes: List of recently added HalfEdges
+    func addHalfEdges(hes: [HalfEdge])
+    
+    /// Called when Cells bounding is done
+    func boundingDone()
+    
+    /// Called when algorithm finished working
+    func workDone()
 }
