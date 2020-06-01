@@ -16,8 +16,6 @@ jobs:
     - name: Build
       run: swift build -v
 
-  build:
-    
     runs-on: ubuntu-latest
 
     steps:
