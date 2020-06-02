@@ -1,6 +1,6 @@
 # Types
 
-  - [PriorityQueue](/PriorityQueue.md):
+  - [PriorityQueue](/Documentation/PriorityQueue.md):
     A PriorityQueue takes objects to be pushed of any type that implements Comparable.
     It will pop the objects in the order that they would be sorted. A pop() or a push()
     can be accomplished in O(lg n) time. It can be specified whether the objects should
