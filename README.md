@@ -1,5 +1,7 @@
 # FortunesAlgorithm
 
+![Swift](https://github.com/fewlinesofcode/FortunesAlgorithm/workflows/Swift/badge.svg)
+
 `FortunesAlgorithm` is a Swift package for building Voronoi diagrams using Steven Fortune's algorithm. Algorithm guarantees `O(n log n)` worst-case running time and uses `O(n)` space.
 
 You can learn more about the project using [Documentation](https://github.com/fewlinesofcode/FortunesAlgorithm/blob/master/Documentation/Home.md)
